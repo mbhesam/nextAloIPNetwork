@@ -1,2 +1,19 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #F5F7FB;
+  --color-text: #060606;
+  --color-link-text: #4C6FFF;
+  --color-box: #FFFFFF;
+  --color-text-error: #DB0000;
+  --color-box-text-error: #FFB3B3;
+  --color-text-success: #0C5205;
+  --color-box-text-success: #86E37C;
+  --color-box-navbar: #061366;
+  --color-text-navbar: #FFFFFF;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
