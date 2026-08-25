@@ -1,0 +1,1198 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+
+interface LegalUser {
+  ID: number;
+  UserID: number;
+  CompanyName: string;
+  OfficialRegisterNumber: string;
+  Address: string;
+  Website: string;
+  CompanyPhoneNumber: string;
+  AgentName1: string;
+  AgentPhoneNumber1: string;
+  AgentName2: string;
+  AgentPhoneNumber2: string;
+  Active: boolean;
+}
+
+const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
+type ModalType = "view" | "edit" | "delete" | "create" | null;
+
+export default function AdminLegalUsersPage() {
+  const { getAccessToken } = useAuth();
+  const [legalUsers, setLegalUsers] = useState<LegalUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [selectedUser, setSelectedUser] = useState<LegalUser | null>(null);
+
+  // Edit states
+  const [editForm, setEditForm] = useState<Partial<LegalUser>>({});
+
+  // Create states
+  const [newForm, setNewForm] = useState<Partial<LegalUser>>({
+    UserID: 0,
+    CompanyName: "",
+    OfficialRegisterNumber: "",
+    Address: "",
+    Website: "",
+    CompanyPhoneNumber: "",
+    AgentName1: "",
+    AgentPhoneNumber1: "",
+    AgentName2: "",
+    AgentPhoneNumber2: "",
+    Active: true,
+  });
+
+  const fetchLegalUsers = async () => {
+    const token = getAccessToken();
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/legal-users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        let usersArray = [];
+        if (Array.isArray(data)) {
+          usersArray = data;
+        } else if (data.data && Array.isArray(data.data)) {
+          usersArray = data.data;
+        } else if (data.legalUsers && Array.isArray(data.legalUsers)) {
+          usersArray = data.legalUsers;
+        } else {
+          usersArray = [];
+        }
+
+        const normalizedUsers = usersArray.map((user: any) => ({
+          ID: user.ID || user.id || 0,
+          UserID: user.UserID || user.userID || user.userId || 0,
+          CompanyName: user.CompanyName || user.companyName || "",
+          OfficialRegisterNumber:
+            user.OfficialRegisterNumber ||
+            user.officialRegisterNumber ||
+            user.registerNumber ||
+            "",
+          Address: user.Address || user.address || "",
+          Website: user.Website || user.website || "",
+          CompanyPhoneNumber:
+            user.CompanyPhoneNumber ||
+            user.companyPhoneNumber ||
+            user.companyPhone ||
+            "",
+          AgentName1: user.AgentName1 || user.agentName1 || "",
+          AgentPhoneNumber1:
+            user.AgentPhoneNumber1 ||
+            user.agentPhoneNumber1 ||
+            user.agentPhone1 ||
+            "",
+          AgentName2: user.AgentName2 || user.agentName2 || "",
+          AgentPhoneNumber2:
+            user.AgentPhoneNumber2 ||
+            user.agentPhoneNumber2 ||
+            user.agentPhone2 ||
+            "",
+          Active: user.Active ?? user.active ?? true,
+        }));
+
+        setLegalUsers(normalizedUsers);
+      }
+    } catch (error) {
+      console.error("Error fetching legal users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createLegalUser = async (userData: any) => {
+    const token = getAccessToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/legal-user`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userData.UserID,
+          companyName: userData.CompanyName,
+          officialRegisterNumber: userData.OfficialRegisterNumber,
+          address: userData.Address || "",
+          website: userData.Website || "",
+          companyPhoneNumber: userData.CompanyPhoneNumber || "",
+          agentName1: userData.AgentName1 || "",
+          agentPhoneNumber1: userData.AgentPhoneNumber1 || "",
+          agentName2: userData.AgentName2 || "",
+          agentPhoneNumber2: userData.AgentPhoneNumber2 || "",
+        }),
+      });
+
+      if (response.ok) {
+        await fetchLegalUsers();
+        return true;
+      } else {
+        const error = await response.text();
+        alert(`❌ خطا: ${error}`);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error creating legal user:", error);
+      alert("❌ خطا در ارتباط با سرور");
+      return false;
+    }
+  };
+
+  const updateLegalUser = async (id: number, userData: any) => {
+    const token = getAccessToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/legal-user/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userData.UserID,
+          companyName: userData.CompanyName,
+          officialRegisterNumber: userData.OfficialRegisterNumber,
+          address: userData.Address || "",
+          website: userData.Website || "",
+          companyPhoneNumber: userData.CompanyPhoneNumber || "",
+          agentName1: userData.AgentName1 || "",
+          agentPhoneNumber1: userData.AgentPhoneNumber1 || "",
+          agentName2: userData.AgentName2 || "",
+          agentPhoneNumber2: userData.AgentPhoneNumber2 || "",
+          active: userData.Active,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchLegalUsers();
+        return true;
+      } else {
+        const error = await response.text();
+        if (error.includes("not a legal type")) {
+          alert(
+            "❌ این کاربر حقیقی است. فقط کاربران حقوقی می‌توانند اطلاعات حقوقی داشته باشند.\nلطفاً ابتدا نوع کاربر را به حقوقی تغییر دهید.",
+          );
+        } else {
+          alert(`❌ خطا: ${error}`);
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error("Error updating legal user:", error);
+      alert("❌ خطا در ارتباط با سرور");
+      return false;
+    }
+  };
+
+  const deleteLegalUser = async (id: number) => {
+    const token = getAccessToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/legal-user/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        await fetchLegalUsers();
+        return true;
+      } else {
+        const error = await response.text();
+        alert(`❌ خطا: ${error}`);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error deleting legal user:", error);
+      alert("❌ خطا در ارتباط با سرور");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    fetchLegalUsers();
+  }, []);
+
+  const filteredUsers = legalUsers.filter((user) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      user.ID?.toString().includes(searchTerm) ||
+      user.UserID?.toString().includes(searchTerm) ||
+      user.CompanyName?.toLowerCase().includes(searchLower) ||
+      user.OfficialRegisterNumber?.includes(searchTerm) ||
+      user.CompanyPhoneNumber?.includes(searchTerm)
+    );
+  });
+
+  const handleView = (user: LegalUser) => {
+    setSelectedUser(user);
+    setModalType("view");
+  };
+
+  const handleEdit = (user: LegalUser) => {
+    setSelectedUser(user);
+    setEditForm(user);
+    setModalType("edit");
+  };
+
+  const handleDeleteClick = (user: LegalUser) => {
+    setSelectedUser(user);
+    setModalType("delete");
+  };
+
+  const handleCreate = () => {
+    setNewForm({
+      UserID: 0,
+      CompanyName: "",
+      OfficialRegisterNumber: "",
+      Address: "",
+      Website: "",
+      CompanyPhoneNumber: "",
+      AgentName1: "",
+      AgentPhoneNumber1: "",
+      AgentName2: "",
+      AgentPhoneNumber2: "",
+      Active: true,
+    });
+    setModalType("create");
+  };
+
+  const confirmDelete = async () => {
+    if (selectedUser) {
+      const success = await deleteLegalUser(selectedUser.ID);
+      if (success) {
+        closeModal();
+      }
+    }
+  };
+
+  const saveEdit = async () => {
+    if (selectedUser && editForm) {
+      if (!editForm.UserID || editForm.UserID === 0) {
+        alert("❌ User ID معتبر نیست");
+        return;
+      }
+
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        // بررسی نوع کاربر
+        const checkResponse = await fetch(
+          `${API_BASE_URL}/v1/user/${editForm.UserID}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const userData = await checkResponse.json();
+
+        if (userData.type !== "legal") {
+          const confirmChange = confirm(
+            `⚠️ کاربر "${userData.name} ${userData.lastName}" از نوع "حقیقی" است.\n\n` +
+              `برای ذخیره اطلاعات حقوقی، باید نوع کاربر به "حقوقی" تغییر کند.\n\n` +
+              `آیا می‌خواهید نوع این کاربر را به "حقوقی" تغییر دهید؟`,
+          );
+
+          if (!confirmChange) {
+            return;
+          }
+
+          // تغییر نوع کاربر
+          const updateTypeResponse = await fetch(
+            `${API_BASE_URL}/v1/user/${editForm.UserID}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: userData.name,
+                lastName: userData.lastName,
+                phoneNumber: userData.phoneNumber,
+                email: userData.email,
+                role: userData.role,
+                type: "legal",
+                budget: userData.budget || 0,
+              }),
+            },
+          );
+
+          if (!updateTypeResponse.ok) {
+            alert("❌ خطا در تغییر نوع کاربر");
+            return;
+          }
+        }
+
+        // ذخیره اطلاعات حقوقی
+        const success = await updateLegalUser(selectedUser.ID, {
+          UserID: editForm.UserID,
+          CompanyName: editForm.CompanyName,
+          OfficialRegisterNumber: editForm.OfficialRegisterNumber,
+          Address: editForm.Address,
+          Website: editForm.Website,
+          CompanyPhoneNumber: editForm.CompanyPhoneNumber,
+          AgentName1: editForm.AgentName1,
+          AgentPhoneNumber1: editForm.AgentPhoneNumber1,
+          AgentName2: editForm.AgentName2,
+          AgentPhoneNumber2: editForm.AgentPhoneNumber2,
+          Active: editForm.Active,
+        });
+
+        if (success) {
+          closeModal();
+          fetchLegalUsers();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("❌ خطا در ارتباط با سرور");
+      }
+    }
+  };
+
+  const saveNewUser = async () => {
+    if (
+      !newForm.CompanyName ||
+      !newForm.OfficialRegisterNumber ||
+      !newForm.UserID
+    ) {
+      alert("لطفاً فیلدهای ضروری (نام شرکت، شماره ثبت، User ID) را پر کنید");
+      return;
+    }
+
+    if (newForm.UserID <= 0) {
+      alert("❌ User ID باید یک عدد معتبر باشد");
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) return;
+
+    try {
+      // بررسی نوع کاربر
+      const checkResponse = await fetch(
+        `${API_BASE_URL}/v1/user/${newForm.UserID}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const userData = await checkResponse.json();
+
+      if (userData.type !== "legal") {
+        const confirmChange = confirm(
+          `⚠️ کاربر "${userData.name} ${userData.lastName}" از نوع "حقیقی" است.\n\n` +
+            `برای ثبت به عنوان کاربر حقوقی، باید نوع کاربر به "حقوقی" تغییر کند.\n\n` +
+            `آیا می‌خواهید نوع این کاربر را به "حقوقی" تغییر دهید؟`,
+        );
+
+        if (!confirmChange) {
+          return;
+        }
+
+        // تغییر نوع کاربر
+        const updateTypeResponse = await fetch(
+          `${API_BASE_URL}/v1/user/${newForm.UserID}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: userData.name,
+              lastName: userData.lastName,
+              phoneNumber: userData.phoneNumber,
+              email: userData.email,
+              role: userData.role,
+              type: "legal",
+              budget: userData.budget || 0,
+            }),
+          },
+        );
+
+        if (!updateTypeResponse.ok) {
+          alert("❌ خطا در تغییر نوع کاربر");
+          return;
+        }
+      }
+
+      const success = await createLegalUser({
+        UserID: newForm.UserID,
+        CompanyName: newForm.CompanyName,
+        OfficialRegisterNumber: newForm.OfficialRegisterNumber,
+        Address: newForm.Address || "",
+        Website: newForm.Website || "",
+        CompanyPhoneNumber: newForm.CompanyPhoneNumber || "",
+        AgentName1: newForm.AgentName1 || "",
+        AgentPhoneNumber1: newForm.AgentPhoneNumber1 || "",
+        AgentName2: newForm.AgentName2 || "",
+        AgentPhoneNumber2: newForm.AgentPhoneNumber2 || "",
+      });
+
+      if (success) {
+        closeModal();
+        fetchLegalUsers();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ خطا در ارتباط با سرور");
+    }
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setSelectedUser(null);
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex flex-col bg-gray-100">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
+        <div className="bg-white rounded-xl shadow-lg flex flex-col flex-1 min-h-0 overflow-hidden mt-30">
+          {/* Header */}
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                🏢 کاربران حقوقی
+              </h1>
+              <p className="text-gray-600 text-sm mt-1">
+                مدیریت و مشاهده اطلاعات کاربران حقوقی
+              </p>
+            </div>
+            <button
+              onClick={handleCreate}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              کاربر جدید
+            </button>
+          </div>
+
+          {/* Search Filter */}
+          <div className="p-4 sm:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  جستجو
+                </label>
+                <input
+                  type="text"
+                  placeholder="جستجو بر اساس ID، User ID، نام شرکت، شماره ثبت..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleResetFilters}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  حذف فیلترها
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              {filteredUsers.length} کاربر یافت شد
+            </div>
+          </div>
+
+          {/* Scrollable List */}
+          <div className="flex-1 min-h-0">
+            <div className="hidden md:block h-full overflow-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      User ID
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      نام شرکت
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      شماره ثبت
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      تلفن شرکت
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                      عملیات
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.map((user) => (
+                    <tr key={user.ID} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm">{user.ID || "—"}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {user.UserID || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium">
+                        {user.CompanyName || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {user.OfficialRegisterNumber || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {user.CompanyPhoneNumber || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleView(user)}
+                            className="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded"
+                          >
+                            مشاهده
+                          </button>
+                          <button
+                            onClick={() => handleEdit(user)}
+                            className="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded"
+                          >
+                            ویرایش
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(user)}
+                            className="text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden h-full overflow-auto">
+              {filteredUsers.map((user) => (
+                <div key={user.ID} className="p-4 border-b hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs text-gray-500">
+                      ID: {user.ID || "—"} | User ID: {user.UserID || "—"}
+                    </span>
+                  </div>
+                  <div className="font-bold text-base mb-2">
+                    {user.CompanyName || "—"}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-1">
+                    شماره ثبت: {user.OfficialRegisterNumber || "—"}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    تلفن: {user.CompanyPhoneNumber || "—"}
+                  </div>
+                  <div className="flex gap-2 pt-2 border-t">
+                    <button
+                      onClick={() => handleView(user)}
+                      className="flex-1 text-indigo-600 py-2 text-sm"
+                    >
+                      مشاهده
+                    </button>
+                    <button
+                      onClick={() => handleEdit(user)}
+                      className="flex-1 text-amber-600 py-2 text-sm"
+                    >
+                      ویرایش
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(user)}
+                      className="flex-1 text-red-600 py-2 text-sm"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">نتیجه‌ای یافت نشد</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* View Modal */}
+      {modalType === "view" && selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold">مشاهده کاربر حقوقی</h2>
+              <button onClick={closeModal} className="text-gray-400 text-2xl">
+                &times;
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-500">ID</label>
+                  <p>{selectedUser.ID || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">User ID</label>
+                  <p>{selectedUser.UserID || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">نام شرکت</label>
+                  <p>{selectedUser.CompanyName || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">شماره ثبت</label>
+                  <p>{selectedUser.OfficialRegisterNumber || "—"}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm text-gray-500">آدرس</label>
+                  <p>{selectedUser.Address || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">وبسایت</label>
+                  <p>{selectedUser.Website || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">تلفن شرکت</label>
+                  <p>{selectedUser.CompanyPhoneNumber || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">نام نماینده 1</label>
+                  <p>{selectedUser.AgentName1 || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">
+                    تلفن نماینده 1
+                  </label>
+                  <p>{selectedUser.AgentPhoneNumber1 || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">نام نماینده 2</label>
+                  <p>{selectedUser.AgentName2 || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">
+                    تلفن نماینده 2
+                  </label>
+                  <p>{selectedUser.AgentPhoneNumber2 || "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500">وضعیت</label>
+                  <p>{selectedUser.Active ? "فعال" : "غیرفعال"}</p>
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {modalType === "edit" && selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold">ویرایش کاربر حقوقی</h2>
+              <button onClick={closeModal} className="text-gray-400 text-2xl">
+                &times;
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    User ID
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.UserID || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        UserID: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام شرکت
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.CompanyName || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, CompanyName: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    شماره ثبت
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.OfficialRegisterNumber || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        OfficialRegisterNumber: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن شرکت
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.CompanyPhoneNumber || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        CompanyPhoneNumber: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">آدرس</label>
+                  <textarea
+                    value={editForm.Address || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, Address: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    وبسایت
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.Website || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, Website: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام نماینده 1
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.AgentName1 || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, AgentName1: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن نماینده 1
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.AgentPhoneNumber1 || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        AgentPhoneNumber1: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام نماینده 2
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.AgentName2 || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, AgentName2: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن نماینده 2
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.AgentPhoneNumber2 || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        AgentPhoneNumber2: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    وضعیت
+                  </label>
+                  <select
+                    value={editForm.Active ? "true" : "false"}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        Active: e.target.value === "true",
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="true">فعال</option>
+                    <option value="false">غیرفعال</option>
+                  </select>
+                </div>
+              </div>
+              <div className="bg-yellow-50 rounded-lg p-3 mt-2">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ توجه: این اطلاعات فقط برای کاربرانی قابل ذخیره است که نوع
+                  حساب آنها "حقوقی" باشد.
+                </p>
+              </div>
+            </div>
+            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={saveEdit}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+              >
+                ذخیره
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {modalType === "create" && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold">افزودن کاربر حقوقی جدید</h2>
+              <button onClick={closeModal} className="text-gray-400 text-2xl">
+                &times;
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    User ID *
+                  </label>
+                  <input
+                    type="number"
+                    value={newForm.UserID || ""}
+                    onChange={(e) =>
+                      setNewForm({
+                        ...newForm,
+                        UserID: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="مثال: 101"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام شرکت *
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.CompanyName || ""}
+                    onChange={(e) =>
+                      setNewForm({ ...newForm, CompanyName: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="مثال: شرکت فناوری اطلاعات"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    شماره ثبت *
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.OfficialRegisterNumber || ""}
+                    onChange={(e) =>
+                      setNewForm({
+                        ...newForm,
+                        OfficialRegisterNumber: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="مثال: 14001234567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن شرکت
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.CompanyPhoneNumber || ""}
+                    onChange={(e) =>
+                      setNewForm({
+                        ...newForm,
+                        CompanyPhoneNumber: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="مثال: 021-88765432"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">آدرس</label>
+                  <textarea
+                    value={newForm.Address || ""}
+                    onChange={(e) =>
+                      setNewForm({ ...newForm, Address: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    rows={2}
+                    placeholder="آدرس کامل شرکت"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    وبسایت
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.Website || ""}
+                    onChange={(e) =>
+                      setNewForm({ ...newForm, Website: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="مثال: www.example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام نماینده 1
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.AgentName1 || ""}
+                    onChange={(e) =>
+                      setNewForm({ ...newForm, AgentName1: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="نام نماینده اول"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن نماینده 1
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.AgentPhoneNumber1 || ""}
+                    onChange={(e) =>
+                      setNewForm({
+                        ...newForm,
+                        AgentPhoneNumber1: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="تلفن نماینده اول"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    نام نماینده 2
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.AgentName2 || ""}
+                    onChange={(e) =>
+                      setNewForm({ ...newForm, AgentName2: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="نام نماینده دوم"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    تلفن نماینده 2
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.AgentPhoneNumber2 || ""}
+                    onChange={(e) =>
+                      setNewForm({
+                        ...newForm,
+                        AgentPhoneNumber2: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="تلفن نماینده دوم"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-red-500">
+                فیلدهای ستاره دار (*) اجباری هستند
+              </p>
+            </div>
+            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                انصراف
+              </button>
+              <button
+                onClick={saveNewUser}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+              >
+                افزودن کاربر
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {modalType === "delete" && selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-center mb-2">حذف کاربر</h3>
+              <p className="text-gray-600 text-center mb-6">
+                آیا از حذف کاربر "{selectedUser.CompanyName}" مطمئن هستید؟
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                >
+                  انصراف
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                >
+                  حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

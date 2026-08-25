@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
+    "irani-calendar": "^1.0.2",
+    "moment-jalaali": "^0.10.4",
     "next": "16.2.6",
     "postcss": "^8.5.15",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-persian-range-picker": "^1.0.35",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
+    "@types/moment-jalaali": "^0.7.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
