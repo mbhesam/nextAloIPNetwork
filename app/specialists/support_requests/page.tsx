@@ -24,7 +24,6 @@ interface SupportRequest {
   };
   AssignedSpecialistID: number | null;
   AssignedSpecialist?: {
-    ID: number;
     UserID: number;
     user?: {
       ID: number;
@@ -40,7 +39,19 @@ interface SupportRequest {
 interface Specialist {
   ID: number;
   userID: number;
+  UserID?: number;
   skills: string;
+  team?: "platformSubmitted" | "aloOperation";
+  Team?: "platformSubmitted" | "aloOperation";
+  Categories?: Category[];
+  categories?: Category[];
+}
+
+interface Category {
+  id: number;
+  ID?: number;
+  name: string;
+  subCategory: string[];
 }
 
 const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
@@ -80,6 +91,7 @@ export default function SpecialistRequestsPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
   const [specialistInfo, setSpecialistInfo] = useState<Specialist | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shiftMessage, setShiftMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -116,7 +128,8 @@ export default function SpecialistRequestsPage() {
 
         // پیدا کردن متخصص مربوط به کاربر فعلی
         const currentSpecialist = specialistsArray.find(
-          (spec: Specialist) => spec.userID === user?.ID,
+          (spec: Specialist) =>
+            spec.userID === user?.ID || spec.UserID === user?.ID,
         );
 
         if (currentSpecialist) {
@@ -131,40 +144,76 @@ export default function SpecialistRequestsPage() {
   };
 
   // دریافت لیست درخواست‌ها
-  const fetchRequests = async () => {
+  const fetchRequests = async (specialist: Specialist | null) => {
     const token = getAccessToken();
     if (!token) {
       setLoading(false);
       return;
     }
 
+    const specialistCategoryIds = [
+      ...(specialist?.categories ?? []),
+      ...(specialist?.Categories ?? []),
+    ]
+      .map((category) => category.id ?? category.ID)
+      .filter((categoryId): categoryId is number => categoryId !== undefined)
+      .filter((categoryId, index, categoryIds) => categoryIds.indexOf(categoryId) === index);
+    const specialistTeam = specialist?.team ?? specialist?.Team ?? "aloOperation";
+
+    if (!specialist || specialistCategoryIds.length === 0) {
+      setRequests([]);
+      setShiftMessage("برای این متخصص دسته‌بندی‌ای ثبت نشده است.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/search`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ limit: 100, offset: 0 }),
-        },
+      setShiftMessage(null);
+      const responses = await Promise.all(
+        specialistCategoryIds.map((categoryId) =>
+          fetch(`${API_BASE_URL}/v1/support-requests/search`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              categoryId,
+              status: "created",
+              team: specialistTeam,
+              ...(specialistTeam === "aloOperation" && {
+                eligibleSpecialistId: specialist.ID,
+              }),
+            }),
+          }),
+        ),
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        const requestsArray = Array.isArray(data)
-          ? data
-          : data.data || data.requests || [];
-
-        // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
-        const sorted = [...requestsArray].sort(
-          (a, b) =>
-            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
+      if (responses.some((response) => response.status === 403)) {
+        setRequests([]);
+        setShiftMessage(
+          "در حال حاضر خارج از زمان شیفت خود هستید و درخواست‌های قابل پذیرش نمایش داده نمی‌شوند.",
         );
-
-        setRequests(sorted);
+        return;
       }
+
+      const requestGroups = await Promise.all(
+        responses
+          .filter((response) => response.ok)
+          .map(async (response) => {
+            const data = await response.json();
+            return Array.isArray(data) ? data : data.data || data.requests || [];
+          }),
+      );
+      const requestsArray = requestGroups.flat();
+
+      // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
+      const sorted = [...requestsArray].sort(
+        (a, b) =>
+          new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
+      );
+
+      setRequests(sorted);
     } catch (error) {
       console.error("Error fetching requests:", error);
     } finally {
@@ -194,7 +243,7 @@ export default function SpecialistRequestsPage() {
       );
 
       if (response.ok) {
-        await fetchRequests();
+        await fetchRequests(specialistInfo);
         return true;
       } else {
         const error = await response.text();
@@ -229,7 +278,7 @@ export default function SpecialistRequestsPage() {
       );
 
       if (response.ok) {
-        await fetchRequests();
+        await fetchRequests(specialistInfo);
         return true;
       } else {
         const error = await response.text();
@@ -246,8 +295,8 @@ export default function SpecialistRequestsPage() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await fetchSpecialistInfo();
-      await fetchRequests();
+      const specialist = await fetchSpecialistInfo();
+      await fetchRequests(specialist);
       setLoading(false);
     };
 
@@ -345,7 +394,7 @@ export default function SpecialistRequestsPage() {
 
   const refreshData = async () => {
     setLoading(true);
-    await fetchRequests();
+    await fetchRequests(specialistInfo);
     setLoading(false);
   };
 
@@ -378,6 +427,15 @@ export default function SpecialistRequestsPage() {
             مشاهده و مدیریت تمام درخواست‌های پشتیبانی
           </p>
         </div>
+
+        {shiftMessage && (
+          <div
+            role="alert"
+            className="flex-shrink-0 mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            {shiftMessage}
+          </div>
+        )}
 
         {/* Filters - Fixed */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden shrink-0 mb-2">

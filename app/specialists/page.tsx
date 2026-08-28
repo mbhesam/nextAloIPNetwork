@@ -34,14 +34,21 @@ interface SupportRequest {
   };
   Status: string;
   description: string;
+  scheduledStart?: string;
+  ScheduledStart?: string;
+  scheduled_start?: string;
   CreatedAt: string;
 }
 
 interface Specialist {
   ID: number;
   userID: number;
+  UserID?: number;
   skills: string;
-  categories: Category[];
+  team?: "platformSubmitted" | "aloOperation";
+  Team?: "platformSubmitted" | "aloOperation";
+  categories?: Category[];
+  Categories?: Category[];
   shifts?: Shift[];
   user?: {
     ID: number;
@@ -54,6 +61,7 @@ interface Specialist {
 
 interface Category {
   id: number;
+  ID?: number;
   name: string;
   subCategory: string[];
 }
@@ -107,6 +115,8 @@ export default function SpecialistDashboardPage() {
   const [specialistInfo, setSpecialistInfo] = useState<Specialist | null>(null);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [shiftMessage, setShiftMessage] = useState<string | null>(null);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(
     null,
@@ -146,7 +156,8 @@ export default function SpecialistDashboardPage() {
         console.log("🔍 [1] Looking for userID:", user?.ID);
 
         const currentSpecialist = specialistsArray.find(
-          (spec: Specialist) => spec.userID === user?.ID,
+          (spec: Specialist) =>
+            (spec.userID === user?.ID || spec.UserID === user?.ID),
         );
 
         if (currentSpecialist) {
@@ -189,9 +200,7 @@ export default function SpecialistDashboardPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            limit: 100,
-            offset: 0,
-            assignedSpecialistId: specialistId,
+            specialist_id: specialistId,
           }),
         },
       );
@@ -235,52 +244,81 @@ export default function SpecialistDashboardPage() {
   };
 
   // دریافت درخواست‌های قابل پذیرش
-  const fetchAcceptableRequests = async () => {
+  const fetchAcceptableRequests = async (specialist: Specialist | null) => {
     const token = getAccessToken();
     console.log("🔍 [3] fetchAcceptableRequests - Token exists:", !!token);
     if (!token) return;
 
+    const specialistCategoryIds = [
+      ...(specialist?.categories ?? []),
+      ...(specialist?.Categories ?? []),
+    ]
+      .map((category) => category.id ?? category.ID)
+      .filter((categoryId): categoryId is number => categoryId !== undefined)
+      .filter((categoryId, index, categoryIds) => categoryIds.indexOf(categoryId) === index);
+    const specialistTeam = specialist?.team ?? specialist?.Team ?? "aloOperation";
+
+    if (!specialist || specialistCategoryIds.length === 0) {
+      setAcceptableRequests([]);
+      return [];
+    }
+
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/search`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ limit: 100, offset: 0 }),
-        },
+      setShiftMessage(null);
+      const responses = await Promise.all(
+        specialistCategoryIds.map((categoryId) =>
+          fetch(`${API_BASE_URL}/v1/support-requests/search`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              categoryId,
+              status: "created",
+              team: specialistTeam,
+              ...(specialistTeam === "aloOperation" && {
+                eligibleSpecialistId: specialist.ID,
+              }),
+            }),
+          }),
+        ),
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        const requestsArray = Array.isArray(data)
-          ? data
-          : data.data || data.requests || [];
-
-        console.log(`✅ [3] Total requests returned: ${requestsArray.length}`);
-
-        const filtered = requestsArray.filter(
-          (req: SupportRequest) =>
-            req.Status === "created" && !req.AssignedSpecialistID,
-        );
-
-        console.log(
-          `✅ [3] Filtered (created & no specialist): ${filtered.length}`,
-        );
-
-        const sorted = [...filtered].sort(
-          (a, b) =>
-            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
-        );
-
-        setAcceptableRequests(sorted);
-        return sorted;
-      } else {
-        console.log("❌ [3] Response not OK:", response.status);
+      if (responses.some((response) => response.status === 403)) {
+        setAcceptableRequests([]);
+        setShiftMessage("شیفت شما نیست در حال حاضر");
         return [];
       }
+
+      const requestGroups = await Promise.all(
+        responses
+          .filter((response) => response.ok)
+          .map(async (response) => {
+            const data = await response.json();
+            return Array.isArray(data) ? data : data.data || data.requests || [];
+          }),
+      );
+      const requestsArray = requestGroups.flat();
+
+      console.log(`✅ [3] Total requests returned: ${requestsArray.length}`);
+
+      const filtered = requestsArray.filter(
+        (req: SupportRequest) =>
+          req.Status === "created" && !req.AssignedSpecialistID,
+      );
+
+      console.log(
+        `✅ [3] Filtered (created & no specialist): ${filtered.length}`,
+      );
+
+      const sorted = [...filtered].sort(
+          (a, b) =>
+            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
+      );
+
+      setAcceptableRequests(sorted);
+      return sorted;
     } catch (error) {
       console.error("❌ [3] Error fetching acceptable requests:", error);
       return [];
@@ -320,7 +358,7 @@ export default function SpecialistDashboardPage() {
         }
 
         console.log("📡 Step 3: Getting acceptable requests...");
-        const acceptable = await fetchAcceptableRequests();
+        const acceptable = await fetchAcceptableRequests(specialist);
         console.log(
           `📡 Step 3: Got ${acceptable?.length || 0} acceptable requests`,
         );
@@ -341,6 +379,11 @@ export default function SpecialistDashboardPage() {
     },
     [user?.ID],
   );
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // بارگذاری اولیه - با بررسی کامل user
   useEffect(() => {
@@ -376,24 +419,6 @@ export default function SpecialistDashboardPage() {
       return () => clearTimeout(timer);
     }
   }, [user, loadAllData]);
-
-  // رفرش خودکار بعد از 3 ثانیه اگر داده‌ها خالی باشند
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (
-        assignedRequests.length === 0 &&
-        acceptableRequests.length === 0 &&
-        !loading &&
-        user?.ID
-      ) {
-        console.log("🔄 Auto-refresh - No data found, retrying...");
-        setDebugInfo("در حال تلاش مجدد برای دریافت اطلاعات...");
-        loadAllData(true);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [assignedRequests, acceptableRequests, loading, user?.ID, loadAllData]);
 
   // پذیرش درخواست
   const acceptRequest = async (requestId: number) => {
@@ -483,7 +508,22 @@ export default function SpecialistDashboardPage() {
     setModalType("view");
   };
 
+  const isBeforeScheduledStart = (request: SupportRequest): boolean => {
+    const scheduledStartValue =
+      request.scheduledStart ??
+      request.ScheduledStart ??
+      request.scheduled_start;
+    if (!scheduledStartValue) return false;
+    const scheduledStart = new Date(scheduledStartValue).getTime();
+    return Number.isFinite(scheduledStart) && scheduledStart > currentTime;
+  };
+
   const handleAccept = async (request: SupportRequest) => {
+    if (isBeforeScheduledStart(request)) {
+      alert("زمان شروع درخواست هنوز نرسیده است");
+      return;
+    }
+
     if (confirm(`آیا از پذیرش درخواست #${request.ID} مطمئن هستید؟`)) {
       const success = await acceptRequest(request.ID);
       if (success) {
@@ -822,12 +862,21 @@ export default function SpecialistDashboardPage() {
               </p>
             </div>
             <button
-              onClick={fetchAcceptableRequests}
+              onClick={() => fetchAcceptableRequests(specialistInfo)}
               className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
             >
               به‌روزرسانی
             </button>
           </div>
+
+          {shiftMessage && (
+            <div
+              role="alert"
+              className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-800"
+            >
+              {shiftMessage}
+            </div>
+          )}
 
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -886,7 +935,17 @@ export default function SpecialistDashboardPage() {
                     <td className="px-4 py-3 text-sm">
                       <button
                         onClick={() => handleAccept(request)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm"
+                        disabled={isBeforeScheduledStart(request)}
+                        title={
+                          isBeforeScheduledStart(request)
+                            ? "زمان شروع درخواست هنوز نرسیده است"
+                            : undefined
+                        }
+                        className={`text-white px-3 py-1 rounded-md text-sm ${
+                          isBeforeScheduledStart(request)
+                            ? "cursor-not-allowed bg-gray-400"
+                            : "bg-green-600 hover:bg-green-700"
+                        }`}
                       >
                         پذیرش
                       </button>
@@ -930,7 +989,17 @@ export default function SpecialistDashboardPage() {
                 </div>
                 <button
                   onClick={() => handleAccept(request)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm"
+                  disabled={isBeforeScheduledStart(request)}
+                  title={
+                    isBeforeScheduledStart(request)
+                      ? "زمان شروع درخواست هنوز نرسیده است"
+                      : undefined
+                  }
+                  className={`w-full text-white py-2 rounded-md text-sm ${
+                    isBeforeScheduledStart(request)
+                      ? "cursor-not-allowed bg-gray-400"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
                   پذیرش درخواست
                 </button>
@@ -1026,9 +1095,21 @@ export default function SpecialistDashboardPage() {
                     handleAccept(selectedRequest);
                     closeModal();
                   }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                  disabled={isBeforeScheduledStart(selectedRequest)}
+                  title={
+                    isBeforeScheduledStart(selectedRequest)
+                      ? "زمان شروع درخواست هنوز نرسیده است"
+                      : undefined
+                  }
+                  className={`px-4 py-2 text-white rounded-lg ${
+                    isBeforeScheduledStart(selectedRequest)
+                      ? "cursor-not-allowed bg-gray-400"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+                  }`}
                 >
-                  پذیرش درخواست{" "}
+                  {isBeforeScheduledStart(selectedRequest)
+                    ? "انتظار تا زمان شروع"
+                    : "پذیرش درخواست"}
                 </button>
               )}
             </div>

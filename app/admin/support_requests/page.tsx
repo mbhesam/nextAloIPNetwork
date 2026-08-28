@@ -443,7 +443,7 @@ export default function AdminSupportRequestsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${categoryColors[request.Category?.name] || "bg-gray-100 text-gray-700"}`}
+				className={`py-1 text-xs rounded-full ${categoryColors[request.Category?.name ?? ''] || "bg-gray-100 text-gray-600"}`}
                         >
                           {request.Category?.name || "—"}
                         </span>

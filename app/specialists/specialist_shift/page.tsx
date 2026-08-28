@@ -32,10 +32,10 @@ interface Specialist {
 const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
 
 const shiftTypeLabels: { [key: string]: string } = {
-  dawn: "سحر (۶-۱۰)",
-  morning: "صبح (۸-۱۲)",
-  evening: "عصر (۱۴-۱۸)",
-  night: "شب (۲۰-۲۴)",
+  dawn: "سحر (۰-۶)",
+  morning: "صبح (۶-۱۲)",
+  evening: "عصر (۱۲-۱۸)",
+  night: "شب (۱۸-۲۴)",
 };
 
 const shiftTypeColors: { [key: string]: string } = {

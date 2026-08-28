@@ -54,7 +54,6 @@ const stateMap: { [key: string]: string } = {
 const cityMap: { [key: string]: string } = {
   // تهران
   Tehran: "تهران",
-  Karaj: "کرج",
   Eslamshahr: "اسلامشهر",
   Rey: "ری",
   Qods: "قدس",
