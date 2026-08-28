@@ -5,6 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 interface Category {
   ID: number;
+  id?: number;
   name: string;
   subCategory: string[];
 }
@@ -62,6 +63,7 @@ export default function AdminSpecialistsPage() {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [allSpecialists, setAllSpecialists] = useState<Specialist[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -77,6 +79,9 @@ export default function AdminSpecialistsPage() {
   const [newUserId, setNewUserId] = useState<number>(0);
   const [newSkills, setNewSkills] = useState("");
   const [newCategories, setNewCategories] = useState("");
+  const [newTeam, setNewTeam] = useState<"aloOperation" | "platformSubmitted">(
+    "aloOperation",
+  );
 
   // دریافت لیست کاربران
   const fetchUsers = async () => {
@@ -96,6 +101,26 @@ export default function AdminSpecialistsPage() {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    const token = getAccessToken();
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/v1/categories`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const categoriesArray = Array.isArray(data)
+          ? data
+          : data.data || data.categories || [];
+        setCategories(categoriesArray);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -164,13 +189,20 @@ export default function AdminSpecialistsPage() {
     if (!token) return false;
 
     try {
+      const formData = new FormData();
+      formData.append("userId", String(specialistData.userId));
+      formData.append("skills", specialistData.skills);
+      specialistData.categoryIds.forEach((categoryId: number) => {
+        formData.append("categoryIds", String(categoryId));
+      });
+      formData.append("team", specialistData.team);
+      formData.append("skillAuthorized", "true");
+      formData.append("active", "true");
+
       const response = await fetch(`${API_BASE_URL}/v1/specialist`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(specialistData),
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
 
       if (response.ok) {
@@ -248,6 +280,7 @@ export default function AdminSpecialistsPage() {
 
   useEffect(() => {
     fetchUsers();
+    fetchCategories();
   }, []);
 
   // بعد از دریافت کاربران، متخصصان رو بگیر
@@ -256,7 +289,8 @@ export default function AdminSpecialistsPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchSpecialists();
     }
-  }, [fetchSpecialists, users]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users.length]);
 
   const getUserName = (userId: number) => {
     const user = users.find((u) => u.ID === userId);
@@ -307,7 +341,26 @@ export default function AdminSpecialistsPage() {
     setNewUserId(0);
     setNewSkills("");
     setNewCategories("");
+    setNewTeam("aloOperation");
     setModalType("create");
+  };
+
+  const getCategoryIds = (value: string): number[] => {
+    return value
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry) => {
+        const numericId = Number(entry);
+        if (Number.isInteger(numericId) && numericId > 0) return numericId;
+
+        const category = categories.find(
+          (item) => item.name.toLowerCase() === entry.toLowerCase(),
+        );
+        return category?.id ?? category?.ID;
+      })
+      .filter((categoryId): categoryId is number => categoryId !== undefined)
+      .filter((categoryId, index, categoryIds) => categoryIds.indexOf(categoryId) === index);
   };
 
   const confirmDelete = async () => {
@@ -322,7 +375,7 @@ export default function AdminSpecialistsPage() {
   const saveEdit = async () => {
     if (selectedSpecialist) {
       const success = await updateSpecialist(selectedSpecialist.ID, {
-        user_id: editUserId,
+        userId: editUserId,
         skills: editSkills,
         categories: editCategories
           .split(",")
@@ -336,18 +389,17 @@ export default function AdminSpecialistsPage() {
   };
 
   const saveNewSpecialist = async () => {
-    if (!newUserId || !newSkills || !newCategories) {
+    const categoryIds = getCategoryIds(newCategories);
+    if (!newUserId || !newSkills || categoryIds.length === 0) {
       alert("لطفاً تمام فیلدهای ضروری را پر کنید");
       return;
     }
 
     const success = await createSpecialist({
-      user_id: newUserId,
+      userId: newUserId,
       skills: newSkills,
-      categories: newCategories
-        .split(",")
-        .map((c) => c.trim())
-        .filter((c) => c),
+      categoryIds,
+      team: newTeam,
     });
 
     if (success) {
@@ -827,7 +879,7 @@ export default function AdminSpecialistsPage() {
                   value={newCategories}
                   onChange={(e) => setNewCategories(e.target.value)}
                   className="w-full p-2 border rounded-lg"
-                  placeholder="مثال: firewall, routing&switching"
+                  placeholder="مثال: 1, 2 یا firewall, routing&switching"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   دسته‌بندی‌ها را با کاما از هم جدا کنید
@@ -835,6 +887,23 @@ export default function AdminSpecialistsPage() {
                 <p className="text-xs text-red-500 mt-1">
                   فیلدهای ستاره دار (*) اجباری هستند
                 </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  تیم *
+                </label>
+                <select
+                  value={newTeam}
+                  onChange={(e) =>
+                    setNewTeam(
+                      e.target.value as "aloOperation" | "platformSubmitted",
+                    )
+                  }
+                  className="w-full p-2 border rounded-lg bg-white"
+                >
+                  <option value="aloOperation">aloOperation</option>
+                  <option value="platformSubmitted">platformSubmitted</option>
+                </select>
               </div>
             </div>
             <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">

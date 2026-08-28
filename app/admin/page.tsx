@@ -255,6 +255,9 @@ export default function AdminDashboardPage() {
     };
 
     loadData();
+    const refreshTimer = setInterval(loadData, 60_000);
+
+    return () => clearInterval(refreshTimer);
   }, [getAccessToken]);
 
   if (loading) {

@@ -74,6 +74,7 @@ const planLabels: { [key: string]: string } = {
   schedulable: "زمان‌بندی شده",
   shortStay: "کوتاه‌مدت",
   inPerson: "حضوری",
+  platformPublished: "پلتفرم",
 };
 
 const categoryColors: { [key: string]: string } = {

@@ -100,6 +100,7 @@ const planLabels: { [key: string]: string } = {
   schedulable: "قابل برنامه‌ریزی",
   shortStay: "اقامت کوتاه",
   inPerson: "حضوری",
+  platformPublished: "پلتفرم",
 };
 
 type ModalType = "view" | null;

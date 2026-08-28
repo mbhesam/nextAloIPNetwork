@@ -51,7 +51,7 @@ const planLabels: { [key: string]: string } = {
   shortStay: "کوتاه‌مدت",
   schedulable: "زمان‌بندی شده",
   inPerson: "حضوری",
-  platformPublished: "پلتفرمی",
+  platformPublished: "پلتفرم",
 };
 
 const planIcons: { [key: string]: string } = {

@@ -151,7 +151,7 @@ export default function UserWalletPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: user.ID,
+          userId: user.ID,
           amount: amount,
         }),
       });
