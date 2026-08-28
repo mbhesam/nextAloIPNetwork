@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -165,10 +166,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🌐</div>
+          <Image
+            src="/aloip-network-logo.svg"
+            width={240}
+            height={64}
+            alt="لوگوی AloIP Network"
+            className="mx-auto mb-4"
+          />
           <h1 className="text-3xl font-bold text-gray-800">AloIPNetwork</h1>
           <p className="text-gray-500 mt-2">به حساب کاربری خود وارد شوید</p>
         </div>

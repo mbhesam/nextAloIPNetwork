@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -15,5 +16,45 @@
 
 body {
   background-color: var(--color-background);
+  background-image: linear-gradient(
+      180deg,
+      rgba(247, 249, 248, 0.82),
+      rgba(247, 249, 248, 0.92)
+    ),
+    url("/network-background.svg");
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  color: #17323b;
   direction: rtl;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-feature-settings: "ss01";
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #b8e9e0;
+  color: #092f3b;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    animation: page-enter 450ms ease-out both;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
 }

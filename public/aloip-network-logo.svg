@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" role="img" aria-labelledby="title desc">
+  <title id="title">AloIP Network</title>
+  <desc id="desc">A network node logo for AloIP Network</desc>
+  <defs>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15b8a6"/>
+      <stop offset="1" stop-color="#087f8c"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="96" rx="22" fill="#092f3b"/>
+  <g fill="none" stroke="#b8f1e8" stroke-width="4" stroke-linecap="round">
+    <path d="M30 48 57 24l27 24-27 24z"/>
+    <path d="M57 24v48M30 48h54M84 48l25-18M84 48l25 18"/>
+  </g>
+  <circle cx="30" cy="48" r="8" fill="url(#mark)"/>
+  <circle cx="57" cy="24" r="8" fill="url(#mark)"/>
+  <circle cx="57" cy="72" r="8" fill="url(#mark)"/>
+  <circle cx="84" cy="48" r="8" fill="url(#mark)"/>
+  <circle cx="109" cy="30" r="7" fill="#f5c86a"/>
+  <circle cx="109" cy="66" r="7" fill="#f5c86a"/>
+  <text x="135" y="45" fill="#ffffff" font-family="Vazirmatn, sans-serif" font-size="24" font-weight="700">AloIP</text>
+  <text x="135" y="70" fill="#9bd9d2" font-family="Vazirmatn, sans-serif" font-size="16" letter-spacing="1">NETWORK</text>
+</svg>

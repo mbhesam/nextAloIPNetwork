@@ -68,10 +68,10 @@ export default function SpecialistsNavbar() {
     <div className="flex fixed z-1 justify-between items-center bg-box-navbar w-full h-30">
       <div className="flex justify-center items-center">
         <Image
-          src="/moradi1382.png"
-          width={100}
-          height={100}
-          alt="Picture of the author"
+            src="/aloip-network-logo.svg"
+            width={180}
+            height={48}
+            alt="لوگوی AloIP Network"
         />
         <p className="flex font-bold text-4xl text-amber-50 lg:hidden">=</p>
         <ul className="flex flex-wrap gap-7 p-5 max-lg:hidden">

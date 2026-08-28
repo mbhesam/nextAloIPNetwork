@@ -100,10 +100,10 @@ export default function AdminNavbar() {
         {/* سمت راست - لوگو + دکمه همبرگر + منوی اصلی */}
         <div className="flex items-center gap-6">
           <Image
-            src="/moradi1382.png"
-            width={100}
-            height={100}
-            alt="Picture of the author"
+            src="/aloip-network-logo.svg"
+            width={180}
+            height={48}
+            alt="لوگوی AloIP Network"
           />
 
           {/* دکمه همبرگری - فقط در موبایل و تبلت */}
