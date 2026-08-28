@@ -9,6 +9,8 @@ interface SupportRequest {
   Category?: { name: string };
   categoryID?: number;
   Status: string;
+  retries?: number;
+  headTechRequired?: boolean;
   AssignedSpecialist?: { User?: { name: string } };
   CreatedAt: string;
   description?: string;
@@ -33,6 +35,16 @@ const statusConfig: {
     label: "در حال انجام",
     color: "bg-blue-100 text-blue-800",
     icon: "🔄",
+  },
+  waitingApproval: {
+    label: "در انتظار تأیید مشتری",
+    color: "bg-orange-100 text-orange-800",
+    icon: "⏳",
+  },
+  done: {
+    label: "تکمیل شده",
+    color: "bg-green-100 text-green-800",
+    icon: "✅",
   },
   resolved: {
     label: "حل شده",
@@ -85,6 +97,8 @@ export default function UserRequestsPage() {
   );
 
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   // =========================
   // دریافت درخواست‌ها
@@ -199,6 +213,60 @@ export default function UserRequestsPage() {
     setShowCancelModal(true);
   };
 
+  const handleFinish = (request: SupportRequest) => {
+    setSelectedRequest(request);
+    setRejectionReason("");
+    setShowFinishModal(true);
+  };
+
+  const submitFinish = async (endApproved: boolean) => {
+    if (!selectedRequest) return;
+    if (!endApproved && (selectedRequest.retries ?? 0) >= 3) {
+      alert("حداکثر تعداد رد درخواست تکمیل شده است");
+      return;
+    }
+    if (!endApproved && !rejectionReason.trim()) {
+      alert("لطفاً دلیل رد پایان درخواست را وارد کنید");
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/v1/support-requests/${selectedRequest.ID}/finish`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(
+            endApproved
+              ? { endApproved: true }
+              : {
+                  endApproved: false,
+                  endRejectionReason: rejectionReason.trim(),
+                },
+          ),
+        },
+      );
+
+      if (response.ok) {
+        await fetchRequests();
+        setShowFinishModal(false);
+        setSelectedRequest(null);
+        alert(endApproved ? "پایان درخواست تأیید شد" : "درخواست برای بررسی مجدد بازگشت داده شد");
+      } else {
+        alert(`❌ خطا: ${await response.text()}`);
+      }
+    } catch (error) {
+      console.error("Error finishing request:", error);
+      alert("❌ خطا در ارتباط با سرور");
+    }
+  };
+
   // =========================
   // تأیید لغو
   // =========================
@@ -248,6 +316,7 @@ export default function UserRequestsPage() {
   const closeModal = () => {
     setSelectedRequest(null);
     setShowCancelModal(false);
+    setShowFinishModal(false);
   };
 
   // =========================
@@ -275,6 +344,14 @@ export default function UserRequestsPage() {
     {
       value: "inProgress",
       label: "در حال انجام",
+    },
+    {
+      value: "waitingApproval",
+      label: "در انتظار تأیید مشتری",
+    },
+    {
+      value: "done",
+      label: "تکمیل شده",
     },
     {
       value: "cancelled",
@@ -427,17 +504,23 @@ export default function UserRequestsPage() {
                         {getPlanLabel(request.plan)}
                       </span>
                     </td>
-
                     <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          categoryColors[
-                            request.Category?.name?.toLowerCase()
-                          ] || "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {request.Category?.name || "—"}
-                      </span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            categoryColors[
+                              request.Category?.name?.toLowerCase()
+                            ] || "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {request.Category?.name || "—"}
+                        </span>
+                        {request.headTechRequired && (
+                          <span className="text-xs font-medium text-red-700">
+                            نیازمند تکنسین ارشد
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-6 py-4 text-sm">
@@ -521,6 +604,11 @@ export default function UserRequestsPage() {
                 <div className="text-sm text-gray-600 mb-3">
                   تاریخ: {formatDate(request.CreatedAt)}
                 </div>
+                {request.headTechRequired && (
+                  <div className="text-sm font-medium text-red-700 mb-3">
+                    نیازمند تکنسین ارشد
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <button
@@ -565,7 +653,7 @@ export default function UserRequestsPage() {
           View Modal
       ========================= */}
 
-      {selectedRequest && !showCancelModal && (
+      {selectedRequest && !showCancelModal && !showFinishModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
           onClick={closeModal}
@@ -622,6 +710,12 @@ export default function UserRequestsPage() {
                   <p>{selectedRequest.Category?.name || "—"}</p>
                 </div>
 
+                {selectedRequest.headTechRequired && (
+                  <div className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                    این درخواست به بررسی تکنسین ارشد نیاز دارد.
+                  </div>
+                )}
+
                 <div className="col-span-2">
                   <label className="text-sm text-gray-500">تاریخ ایجاد</label>
 
@@ -639,11 +733,53 @@ export default function UserRequestsPage() {
             </div>
 
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              {selectedRequest.Status === "waitingApproval" && (
+                <div className="ml-auto flex gap-2">
+                  <button
+                    onClick={() => handleFinish(selectedRequest)}
+                    disabled={(selectedRequest.retries ?? 0) >= 3}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                  >
+                    رد پایان
+                  </button>
+                  <button
+                    onClick={() => submitFinish(true)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                  >
+                    تأیید پایان
+                  </button>
+                </div>
+              )}
               <button
                 onClick={closeModal}
                 className="px-4 py-2 bg-gray-300 rounded-lg"
               >
                 بستن
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFinishModal && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold mb-3">رد پایان درخواست</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              رد اول و دوم، درخواست را دوباره به وضعیت در حال انجام برمی‌گرداند. رد سوم نیاز به تکنسین ارشد دارد.
+            </p>
+            <textarea
+              value={rejectionReason}
+              onChange={(event) => setRejectionReason(event.target.value)}
+              placeholder="دلیل رد پایان را وارد کنید"
+              className="w-full min-h-24 border rounded-lg p-3"
+            />
+            <div className="flex gap-3 justify-end mt-4">
+              <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded-lg">
+                انصراف
+              </button>
+              <button onClick={() => submitFinish(false)} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+                ثبت رد پایان
               </button>
             </div>
           </div>

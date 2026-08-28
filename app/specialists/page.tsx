@@ -34,6 +34,8 @@ interface SupportRequest {
   };
   Status: string;
   description: string;
+  durationMinutes?: number;
+  headTechRequired?: boolean;
   scheduledStart?: string;
   ScheduledStart?: string;
   scheduled_start?: string;
@@ -86,6 +88,16 @@ const statusConfig: {
     label: "در حال انجام",
     color: "bg-blue-100 text-blue-800",
     icon: "🔄",
+  },
+  waitingApproval: {
+    label: "در انتظار تأیید مشتری",
+    color: "bg-orange-100 text-orange-800",
+    icon: "⏳",
+  },
+  done: {
+    label: "تکمیل شده",
+    color: "bg-green-100 text-green-800",
+    icon: "✅",
   },
   resolved: {
     label: "حل شده",
@@ -216,7 +228,10 @@ export default function SpecialistDashboardPage() {
 
         const filtered = requestsArray.filter(
           (req: SupportRequest) =>
-            req.Status === "inProgress" || req.Status === "resolved",
+            req.Status === "inProgress" ||
+            req.Status === "waitingApproval" ||
+            req.Status === "resolved" ||
+            req.Status === "done",
         );
 
         console.log(
@@ -458,21 +473,21 @@ export default function SpecialistDashboardPage() {
   };
 
   // تکمیل درخواست
-  const completeRequest = async (requestId: number) => {
+  const completeRequest = async (requestId: number, durationMinutes: number) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/v1/support-request/${requestId}`,
+        `${API_BASE_URL}/v1/support-requests/${requestId}/complete`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            status: "resolved",
+            durationMinutes,
           }),
         },
       );
@@ -534,8 +549,16 @@ export default function SpecialistDashboardPage() {
   };
 
   const handleComplete = async (request: SupportRequest) => {
+    if (request.headTechRequired) {
+      alert("این درخواست به بررسی تکنسین ارشد نیاز دارد");
+      return;
+    }
+
     if (confirm(`آیا از اتمام درخواست #${request.ID} مطمئن هستید؟`)) {
-      const success = await completeRequest(request.ID);
+      const durationInput = prompt("مدت زمان انجام درخواست را به دقیقه وارد کنید", "60");
+      const durationMinutes = Number(durationInput);
+      if (!Number.isInteger(durationMinutes) || durationMinutes <= 0) return;
+      const success = await completeRequest(request.ID, durationMinutes);
       if (success) {
         alert(`✅ درخواست #${request.ID} با موفقیت تکمیل شد`);
         closeModal();
@@ -568,7 +591,7 @@ export default function SpecialistDashboardPage() {
     (r) => r.Status === "inProgress",
   ).length;
   const completedCount = assignedRequests.filter(
-    (r) => r.Status === "resolved",
+    (r) => r.Status === "resolved" || r.Status === "done",
   ).length;
   const upcomingShiftsCount = shifts.length;
   const acceptableRequestsCount = acceptableRequests.length;
@@ -783,7 +806,17 @@ export default function SpecialistDashboardPage() {
                         {request.Status === "inProgress" && (
                           <button
                             onClick={() => handleComplete(request)}
-                            className="text-green-600 hover:bg-green-50 px-3 py-1 rounded-md"
+                            disabled={request.headTechRequired}
+                            title={
+                              request.headTechRequired
+                                ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
+                                : undefined
+                            }
+                            className={`px-3 py-1 rounded-md ${
+                              request.headTechRequired
+                                ? "cursor-not-allowed text-gray-400"
+                                : "text-green-600 hover:bg-green-50"
+                            }`}
                           >
                             پایان
                           </button>
@@ -837,7 +870,17 @@ export default function SpecialistDashboardPage() {
                   {request.Status === "inProgress" && (
                     <button
                       onClick={() => handleComplete(request)}
-                      className="flex-1 text-green-600 py-2 text-sm"
+                      disabled={request.headTechRequired}
+                      title={
+                        request.headTechRequired
+                          ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
+                          : undefined
+                      }
+                      className={`flex-1 py-2 text-sm ${
+                        request.headTechRequired
+                          ? "cursor-not-allowed text-gray-400"
+                          : "text-green-600 hover:bg-green-50"
+                      }`}
                     >
                       پایان
                     </button>
@@ -1085,7 +1128,17 @@ export default function SpecialistDashboardPage() {
                     handleComplete(selectedRequest);
                     closeModal();
                   }}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                  disabled={selectedRequest.headTechRequired}
+                  title={
+                    selectedRequest.headTechRequired
+                      ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
+                      : undefined
+                  }
+                  className={`px-4 py-2 text-white rounded-lg ${
+                    selectedRequest.headTechRequired
+                      ? "cursor-not-allowed bg-gray-400"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
                   پایان پشتیبانی
                 </button>

@@ -33,6 +33,8 @@ interface SupportRequest {
   };
   Status: string;
   description: string;
+  durationMinutes?: number;
+  headTechRequired?: boolean;
   CreatedAt: string;
 }
 
@@ -229,9 +231,9 @@ export default function SpecialistRequestsPage() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/v1/support-request/${requestId}`,
+        `${API_BASE_URL}/v1/support-requests/${requestId}/complete`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -273,7 +275,7 @@ export default function SpecialistRequestsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            status: "resolved",
+            durationMinutes: 60,
           }),
         },
       );

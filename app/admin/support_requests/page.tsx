@@ -32,6 +32,8 @@ interface SupportRequest {
     };
   };
   Status: string;
+  retries?: number;
+  headTechRequired?: boolean;
   description: string;
   CreatedAt: string;
 }
@@ -60,6 +62,11 @@ const statusConfig: {
     label: "در حال انجام",
     color: "bg-blue-100 text-blue-800",
     icon: "🔄",
+  },
+  waitingApproval: {
+    label: "در انتظار تأیید مشتری",
+    color: "bg-orange-100 text-orange-800",
+    icon: "⏳",
   },
   resolved: {
     label: "حل شده",
@@ -448,6 +455,11 @@ export default function AdminSupportRequestsPage() {
                         >
                           {request.Category?.name || "—"}
                         </span>
+                        {request.headTechRequired && (
+                          <span className="mr-2 px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
+                            نیازمند تکنسین ارشد
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
                         {getSpecialistName(request)}
@@ -516,6 +528,11 @@ export default function AdminSupportRequestsPage() {
                       <span className="text-xs text-gray-500">پلن:</span>{" "}
                       {planLabels[request.plan] || request.plan}
                     </div>
+                        {request.headTechRequired && (
+                          <div className="col-span-2 text-red-700 font-medium">
+                            این درخواست به بررسی تکنسین ارشد نیاز دارد.
+                          </div>
+                        )}
                     <div>
                       <span className="text-xs text-gray-500">دسته‌بندی:</span>{" "}
                       {request.Category?.name || "—"}
@@ -617,7 +634,7 @@ export default function AdminSupportRequestsPage() {
                   <label className="text-sm text-gray-500">دسته‌بندی</label>
                   <p>
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${categoryColors[selectedRequest.Category?.name] || "bg-gray-100"}`}
+                      className={`px-2 py-1 text-xs rounded-full ${categoryColors[selectedRequest.Category?.name ?? ""] || "bg-gray-100"}`}
                     >
                       {selectedRequest.Category?.name || "—"}
                     </span>
@@ -627,6 +644,11 @@ export default function AdminSupportRequestsPage() {
                   <label className="text-sm text-gray-500">متخصص</label>
                   <p>{getSpecialistName(selectedRequest)}</p>
                 </div>
+                {selectedRequest.headTechRequired && (
+                  <div className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                    این درخواست به بررسی تکنسین ارشد نیاز دارد.
+                  </div>
+                )}
                 <div className="col-span-2">
                   <label className="text-sm text-gray-500">تاریخ ایجاد</label>
                   <p>{formatDate(selectedRequest.CreatedAt)}</p>
