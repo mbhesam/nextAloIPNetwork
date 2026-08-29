@@ -421,7 +421,7 @@ export default function SpecialistRequestsPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6">
+      <div className="flex-1 flex flex-col min-h-0 p-4 mt-30 sm:p-6">
         {/* Header - Fixed */}
         <div className="flex-shrink-0 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">

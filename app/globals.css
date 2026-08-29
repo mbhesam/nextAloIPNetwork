@@ -15,21 +15,21 @@
 }
 
 body {
-  background-color: var(--color-background);
-  background-image: linear-gradient(
-      180deg,
-      rgba(247, 249, 248, 0.82),
-      rgba(247, 249, 248, 0.92)
-    ),
-    url("/network-background.svg");
-  background-attachment: fixed;
-  background-position: center;
-  background-size: cover;
+  background: transparent;
   color: #17323b;
   direction: rtl;
   font-family: "Vazirmatn", Tahoma, sans-serif;
   font-feature-settings: "ss01";
   margin: 0;
+}
+
+/* Keep the page-level gray wrappers transparent so the animated network canvas stays visible behind every page. */
+body .bg-gray-50,
+body .bg-gray-100,
+body [class*="bg-gray-"],
+body [class*="bg-white"],
+body .min-h-screen {
+  background-color: transparent !important;
 }
 
 button,
@@ -54,7 +54,22 @@ textarea {
   from {
     opacity: 0.75;
   }
+
   to {
     opacity: 1;
   }
+}
+
+/* In your global.css */
+/* In your global.css */
+.network-bg {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
+  background-color: #0b0f1a;
 }

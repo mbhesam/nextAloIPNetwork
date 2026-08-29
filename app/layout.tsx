@@ -1,15 +1,11 @@
-"use client"
-
+"use client";
 
 import "./globals.css";
 import AdminNavbar from "./admin/admin_navbar/page";
 import SpecialistsNavbar from "./specialists/specialists_navbar/page";
 import UsersNavbar from "./users/users_navbar/page";
 import { AuthProvider } from "./contexts/AuthContext";
-
-
-
-  
+import NetworkBackground from "./specialists/_Compoents/NetBg";
 
 export default function RootLayout({
   children,
@@ -18,12 +14,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full bg-transparent">
         <AuthProvider>
-          <AdminNavbar />
-          <SpecialistsNavbar />
-          <UsersNavbar />
-          {children}
+          <div className="relative min-h-screen bg-transparent">
+            <NetworkBackground
+              nodeCount={70}
+              maxDist={160}
+              nodeRadius={2.4}
+              linkOpacity={0.5}
+              speed={0.4}
+              nodeColor="#62c8ff"
+              linkColor="#3aa8ff"
+            />
+            <div className="relative z-10">
+              <AdminNavbar />
+              <SpecialistsNavbar />
+              <UsersNavbar />
+              {children}
+            </div>
+          </div>
         </AuthProvider>
       </body>
     </html>
