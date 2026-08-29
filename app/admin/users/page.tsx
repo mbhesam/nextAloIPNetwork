@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface User {
   ID: number;
@@ -21,7 +22,7 @@ interface User {
   updatedAt?: string;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const roleColors = {
   admin: "bg-purple-100 text-purple-800",

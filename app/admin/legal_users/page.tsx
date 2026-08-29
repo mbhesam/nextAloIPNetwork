@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface LegalUser {
   ID: number;
@@ -18,7 +19,7 @@ interface LegalUser {
   Active: boolean;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 type ModalType = "view" | "edit" | "delete" | "create" | null;
 

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import moment from "moment-jalaali";
+import { API_BASE_URL } from "../../lib/api";
 
 interface SupportRequest {
   ID: number;
@@ -56,7 +57,7 @@ interface Category {
   subCategory: string[];
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const statusConfig: {
   [key: string]: { label: string; color: string; icon: string };

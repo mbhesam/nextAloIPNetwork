@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import moment from "moment-jalaali";
+import { API_BASE_URL } from "../lib/api";
 
 interface SupportRequest {
   ID: number;
@@ -74,7 +75,7 @@ interface Shift {
   shiftTime: "morning" | "evening" | "night";
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const statusConfig: {
   [key: string]: { label: string; color: string; icon: string };

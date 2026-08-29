@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import moment from "moment-jalaali";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Shift {
   id: number;
@@ -29,7 +30,7 @@ interface Specialist {
   shifts?: Shift[];
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const shiftTypeLabels: { [key: string]: string } = {
   dawn: "سحر (۰-۶)",

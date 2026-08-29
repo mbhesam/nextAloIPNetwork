@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import moment from "moment-jalaali";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Shift {
   id: number;
@@ -21,7 +22,7 @@ interface Specialist {
   };
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 moment.loadPersian({ dialect: "persian-modern" });
 

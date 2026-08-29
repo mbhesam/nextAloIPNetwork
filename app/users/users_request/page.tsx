@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface SupportRequest {
   ID: number;
@@ -17,7 +18,7 @@ interface SupportRequest {
   CustomerID: number;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const statusConfig: {
   [key: string]: {
@@ -179,6 +180,11 @@ export default function UserRequestsPage() {
   // =========================
   // فیلتر درخواست‌ها
   // =========================
+
+  const getCategoryColor = (categoryName?: string) => {
+    if (!categoryName) return "bg-gray-100 text-gray-700";
+    return categoryColors[categoryName.toLowerCase()] || "bg-gray-100 text-gray-700";
+  };
 
   const filteredRequests = requests.filter((request) => {
     if (statusFilter !== "all" && request.Status !== statusFilter) {
@@ -507,11 +513,9 @@ export default function UserRequestsPage() {
                     <td className="px-6 py-4 text-sm">
                       <div className="flex flex-col items-start gap-1">
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            categoryColors[
-                              request.Category?.name?.toLowerCase()
-                            ] || "bg-gray-100 text-gray-700"
-                          }`}
+                          className={`px-2 py-1 text-xs rounded-full ${getCategoryColor(
+                            request.Category?.name,
+                          )}`}
                         >
                           {request.Category?.name || "—"}
                         </span>
@@ -592,10 +596,9 @@ export default function UserRequestsPage() {
                   </span>
 
                   <span
-                    className={`px-2 py-0.5 text-xs rounded-full ${
-                      categoryColors[request.Category?.name?.toLowerCase()] ||
-                      "bg-gray-100 text-gray-700"
-                    }`}
+                    className={`px-2 py-0.5 text-xs rounded-full ${getCategoryColor(
+                      request.Category?.name,
+                    )}`}
                   >
                     {request.Category?.name || "—"}
                   </span>

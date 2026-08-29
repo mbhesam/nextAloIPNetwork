@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Category {
   id: number;
@@ -50,7 +51,7 @@ interface CategoryOption {
   name: string;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 export default function SpecialistProfilePage() {
   const { getAccessToken, user: authUser, logout } = useAuth();
@@ -258,7 +259,8 @@ export default function SpecialistProfilePage() {
         city: currentUser.city || "",
         province: currentUser.state || "",
         skills: currentSpecialist?.skills || "",
-        categoryIds: currentSpecialist?.Categories?.map((cat) => cat.id) || [],
+        categoryIds:
+          currentSpecialist?.Categories?.map((cat: Category) => cat.id) || [],
         melliCode: currentUser.melliCode || "",
       };
 

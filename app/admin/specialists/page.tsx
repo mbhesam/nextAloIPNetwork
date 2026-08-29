@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Category {
   ID: number;
@@ -26,7 +27,7 @@ interface User {
   role?: string;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const categoryColors: { [key: string]: string } = {
   firewall: "bg-red-100 text-red-800",

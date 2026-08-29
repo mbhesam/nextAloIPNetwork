@@ -5,8 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "../lib/api";
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 export default function LoginPage() {
   const { login } = useAuth();

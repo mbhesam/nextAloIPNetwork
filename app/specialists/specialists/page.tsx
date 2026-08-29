@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Category {
   id: number;
@@ -29,7 +30,7 @@ interface Specialist {
   };
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const skillColors: { [key: string]: string } = {
   juniper: "bg-cyan-100 text-cyan-800",

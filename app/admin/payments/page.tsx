@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import moment from "moment-jalaali";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Payment {
   ID: number;
@@ -14,7 +15,7 @@ interface Payment {
   UpdatedAt?: string;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 const statusConfig: {
   [key: string]: { label: string; color: string; icon: string };

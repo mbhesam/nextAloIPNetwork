@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface ProfileData {
   name: string;
@@ -13,7 +14,7 @@ interface ProfileData {
   melliCode: string;
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 // نقشه تبدیل استان‌ها به فارسی
 const stateMap: { [key: string]: string } = {

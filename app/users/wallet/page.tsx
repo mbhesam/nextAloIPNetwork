@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 interface Payment {
   ID: number;
@@ -21,7 +22,7 @@ interface BudgetInfo {
   };
 }
 
-const API_BASE_URL = "http://apialoipnetwork.hesamhelperdomain.ir";
+
 
 export default function UserWalletPage() {
   const { user, getAccessToken } = useAuth();

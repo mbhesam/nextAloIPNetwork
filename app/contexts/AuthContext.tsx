@@ -11,12 +11,12 @@ import {
 import { useRouter } from "next/navigation";
 
 interface User {
-  budget: number;
-  name: unknown;
+  budget?: number;
+  name?: string;
   ID: number;
   firstName?: string;
   lastName?: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   email?: string;
   role?: string;
 }
