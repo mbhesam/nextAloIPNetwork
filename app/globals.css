@@ -89,9 +89,11 @@ body .text-blue-500 {
   color: #1e3a8a !important;
 }
 
-body .bg-blue-100.text-blue-800,
-body .bg-blue-100 .text-blue-800,
-body .text-blue-800 {
+body .bg-blue-100,
+body .bg-blue-100 > span,
+body .bg-blue-100 span,
+body .bg-blue-100 button,
+body .bg-blue-100 .text-blue-800 {
   color: #1e3a8a !important;
 }
 
@@ -117,27 +119,20 @@ body .text-indigo-500 {
   color: #312e81 !important;
 }
 
-body [class*="bg-indigo-"] .text-indigo-700,
-body [class*="bg-indigo-"] .text-indigo-600,
-body [class*="bg-indigo-"] .text-indigo-500,
-body [class*="bg-indigo-"] .text-indigo-400,
-body [class*="bg-indigo-"] .text-indigo-300,
+body .bg-indigo-50,
+body .bg-indigo-50 > div,
+body .bg-indigo-50 div,
+body .bg-indigo-50 span,
+body .bg-indigo-50 button,
 body .bg-indigo-50 .text-indigo-700,
 body .bg-indigo-50 .text-indigo-600,
 body .bg-indigo-50 .text-indigo-500,
 body .bg-indigo-50 .text-indigo-400,
 body .bg-indigo-50 .text-indigo-300,
-body .bg-indigo-50 {
-  color: #312e81 !important;
-}
-
 body .bg-indigo-50 .text-gray-400,
 body .bg-indigo-50 .text-gray-500,
-body .bg-indigo-50 button.text-gray-400,
-body .bg-indigo-50 button.text-gray-500,
-body [class*="bg-indigo-"] button.text-gray-400,
-body [class*="bg-indigo-"] button.text-gray-500 {
-  color: #475569 !important;
+body .bg-indigo-50 .hover\:text-indigo-600:hover {
+  color: #312e81 !important;
 }
 
 body [class*="bg-cyan-"][class*="text-cyan-"],

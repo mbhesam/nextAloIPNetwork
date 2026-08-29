@@ -3,6 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../lib/api";
+import {
+  createSupportRequest as createSupportRequestApi,
+  fetchCategories as fetchCategoriesApi,
+  fetchCostSettings as fetchCostSettingsApi,
+  fetchSupportRequestById as fetchSupportRequestByIdApi,
+  fetchSupportRequests as fetchSupportRequestsApi,
+  fetchUserBudget as fetchUserBudgetApi,
+} from "../lib/api/user-dashboard";
+import RequestStatusBadge from "./components/RequestStatusBadge";
 
 interface User {
   ID: number;
@@ -488,85 +497,13 @@ export default function UserDashboardPage() {
 
   /* ==================== بودجه ==================== */
 
-  const extractBudget = (data: any): number | null => {
-    if (data === null || data === undefined) {
-      return null;
-    }
-
-    if (typeof data === "number" || typeof data === "string") {
-      return parseNumber(data);
-    }
-
-    const keys = [
-      "budget",
-      "Budget",
-      "walletBalance",
-      "WalletBalance",
-      "balance",
-      "Balance",
-      "amount",
-      "Amount",
-      "remainingBudget",
-      "RemainingBudget",
-      "userBudget",
-      "UserBudget",
-    ];
-
-    for (const key of keys) {
-      if (data[key] !== undefined && data[key] !== null) {
-        return parseNumber(data[key]);
-      }
-    }
-
-    const nestedKeys = [
-      "data",
-      "Data",
-      "user",
-      "User",
-      "result",
-      "Result",
-      "information",
-      "Information",
-    ];
-
-    for (const key of nestedKeys) {
-      if (data[key]) {
-        const result = extractBudget(data[key]);
-
-        if (result !== null) {
-          return result;
-        }
-      }
-    }
-
-    return null;
-  };
-
   const fetchBudgetInfo = useCallback(async () => {
     const token = getAccessToken();
 
     if (!token || !user?.ID) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/users-information/budget-info`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: user.ID,
-          }),
-        },
-      );
-
-      if (!response.ok) return;
-
-      const data = await response.json();
-
-      const budget = extractBudget(data);
+      const budget = await fetchUserBudgetApi(token, user.ID);
 
       if (budget !== null) {
         setWalletBalance(budget);
@@ -587,34 +524,9 @@ export default function UserDashboardPage() {
     setLoadingRequests(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/search`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customer_id: user.ID,
-          }),
-        },
-      );
-
-      if (!response.ok) return;
-
-      const data = await response.json();
-
-      const requestsArray = Array.isArray(data)
-        ? data
-        : data.data || data.requests || [];
-
-      const sorted = [...requestsArray].sort(
-        (a, b) => Number(b.ID ?? b.id) - Number(a.ID ?? a.id),
-      );
+      const sorted = await fetchSupportRequestsApi(token, user.ID);
 
       setRequests(sorted.slice(0, 3));
-
       setAllRequestsState(sorted);
     } catch (error) {
       console.error("Requests error:", error);
@@ -714,18 +626,13 @@ export default function UserDashboardPage() {
         requestBody.scheduledEnd = scheduledEnd;
       }
 
-      const response = await fetch(`${API_BASE_URL}/v1/support-request`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const { ok, responseText } = await createSupportRequestApi(
+        token,
+        user.ID,
+        requestBody,
+      );
 
-      const responseText = await response.text();
-
-      if (response.status === 201 || response.ok) {
+      if (ok) {
         alert("✅ درخواست شما با موفقیت ثبت شد");
 
         setShowNewRequestModal(false);
@@ -773,18 +680,9 @@ export default function UserDashboardPage() {
     try {
       const requestId = request.ID ?? request.id;
 
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-request/${requestId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const data = await fetchSupportRequestByIdApi(token, requestId);
 
-      if (response.ok) {
-        const data = await response.json();
-
+      if (data) {
         setSelectedRequest(data);
       }
     } catch (error) {
@@ -800,32 +698,13 @@ export default function UserDashboardPage() {
   /* ==================== Cost Settings ==================== */
 
   useEffect(() => {
-    const fetchCostSettings = async () => {
+    const loadCostSettings = async () => {
       const token = getAccessToken();
 
       if (!token) return;
 
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/v1/cost-settings?limit=100&offset=0`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          console.error("Cost settings error:", response.status);
-          return;
-        }
-
-        const data = await response.json();
-
-        const settings: CostSetting[] = Array.isArray(data)
-          ? data
-          : data.data || [];
+        const settings: CostSetting[] = await fetchCostSettingsApi(token);
 
         setCostSettings(settings);
 
@@ -842,35 +721,26 @@ export default function UserDashboardPage() {
       }
     };
 
-    fetchCostSettings();
+    void loadCostSettings();
   }, [getAccessToken]);
 
   /* ==================== Categories ==================== */
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       const token = getAccessToken();
 
       if (!token) return;
 
       try {
-        const response = await fetch(`${API_BASE_URL}/v1/categories`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) return;
-
-        const data = await response.json();
-
-        setCategories(Array.isArray(data) ? data : data.data || []);
+        const data = await fetchCategoriesApi(token);
+        setCategories(data);
       } catch (error) {
         console.error("Categories error:", error);
       }
     };
 
-    fetchCategories();
+    void loadCategories();
   }, [getAccessToken]);
 
   /* ==================== User ==================== */
@@ -1756,15 +1626,10 @@ export default function UserDashboardPage() {
                   <label className="text-sm text-gray-500">وضعیت</label>
 
                   <p>
-                    <span
-                      className={`px-2 py-0.5 text-xs rounded-full ${
-                        statusConfig[selectedRequest.Status]?.color ||
-                        "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {statusConfig[selectedRequest.Status]?.icon}{" "}
-                      {statusConfig[selectedRequest.Status]?.label}
-                    </span>
+                    <RequestStatusBadge
+                      status={selectedRequest.Status}
+                      statusConfig={statusConfig}
+                    />
                   </p>
                 </div>
 

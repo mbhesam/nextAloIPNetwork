@@ -5,7 +5,7 @@ import AdminNavbar from "./admin/admin_navbar/page";
 import SpecialistsNavbar from "./specialists/specialists_navbar/page";
 import UsersNavbar from "./users/users_navbar/page";
 import { AuthProvider } from "./contexts/AuthContext";
-import NetworkBackground from "./specialists/_Compoents/NetBg";
+import NetworkBackground from "./specialists/components/NetworkBackground";
 
 export default function RootLayout({
   children,
