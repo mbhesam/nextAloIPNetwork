@@ -65,7 +65,7 @@ export default function SpecialistsNavbar() {
   if (!SpecialistsNavbar) return null;
 
   return (
-    <div className="flex fixed z-1 justify-between items-center bg-box-navbar w-full h-30">
+    <div className="flex fixed top-0 left-0 z-50 justify-between items-center bg-box-navbar w-full h-30">
       <div className="flex justify-center items-center">
         <Image
             src="/aloip-network-logo.svg"

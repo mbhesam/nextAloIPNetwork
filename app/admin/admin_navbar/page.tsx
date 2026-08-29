@@ -96,7 +96,7 @@ export default function AdminNavbar() {
 
   return (
     <>
-      <div className="flex fixed z-50 justify-between items-center bg-box-navbar w-full h-30 px-4">
+      <div className="flex fixed top-0 left-0 z-50 justify-between items-center bg-box-navbar w-full h-30 px-4">
         {/* سمت راست - لوگو + دکمه همبرگر + منوی اصلی */}
         <div className="flex items-center gap-6">
           <Image
