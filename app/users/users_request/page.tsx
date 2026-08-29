@@ -2,23 +2,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { API_BASE_URL } from "../../lib/api";
+import {
+  cancelSupportRequest,
+  fetchUserSupportRequests,
+  finishSupportRequest,
+  type SupportRequestListItem,
+} from "../../lib/api/user-requests";
 
-interface SupportRequest {
-  ID: number;
-  plan: string;
-  Category?: { name: string };
-  categoryID?: number;
-  Status: string;
-  retries?: number;
-  headTechRequired?: boolean;
-  AssignedSpecialist?: { User?: { name: string } };
-  CreatedAt: string;
-  description?: string;
-  CustomerID: number;
-}
-
-
+type SupportRequest = SupportRequestListItem;
 
 const statusConfig: {
   [key: string]: {
@@ -113,31 +104,8 @@ export default function UserRequestsPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/search`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customer_id: user.ID,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-
-        const requestsArray = Array.isArray(data)
-          ? data
-          : data.data || data.requests || [];
-
-        const sortedRequests = [...requestsArray].sort((a, b) => b.ID - a.ID);
-
-        setRequests(sortedRequests);
-      }
+      const sortedRequests = await fetchUserSupportRequests(token, user.ID);
+      setRequests(sortedRequests);
     } catch (error) {
       console.error("Error fetching requests:", error);
     } finally {
@@ -240,32 +208,20 @@ export default function UserRequestsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/${selectedRequest.ID}/finish`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(
-            endApproved
-              ? { endApproved: true }
-              : {
-                  endApproved: false,
-                  endRejectionReason: rejectionReason.trim(),
-                },
-          ),
-        },
+      const result = await finishSupportRequest(
+        token,
+        selectedRequest.ID,
+        endApproved,
+        rejectionReason,
       );
 
-      if (response.ok) {
+      if (result.ok) {
         await fetchRequests();
         setShowFinishModal(false);
         setSelectedRequest(null);
         alert(endApproved ? "پایان درخواست تأیید شد" : "درخواست برای بررسی مجدد بازگشت داده شد");
       } else {
-        alert(`❌ خطا: ${await response.text()}`);
+        alert(`❌ خطا: ${result.responseText}`);
       }
     } catch (error) {
       console.error("Error finishing request:", error);
@@ -285,21 +241,9 @@ export default function UserRequestsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-request/${selectedRequest.ID}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status: "cancelled",
-          }),
-        },
-      );
+      const result = await cancelSupportRequest(token, selectedRequest.ID);
 
-      if (response.ok) {
+      if (result.ok) {
         alert(`✅ درخواست #${selectedRequest.ID} با موفقیت لغو شد`);
 
         await fetchRequests();
