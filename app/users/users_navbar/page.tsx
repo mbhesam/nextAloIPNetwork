@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 import { useEffect, useState } from "react";
 
 export default function UsersNavbar() {
@@ -29,12 +30,9 @@ export default function UsersNavbar() {
       if (!token) return;
 
       try {
-        const response = await fetch(
-          `http://apialoipnetwork.hesamhelperdomain.ir/v1/users/${user.ID}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const response = await fetch(`${API_BASE_URL}/v1/users/${user.ID}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (response.ok) {
           const data = await response.json();

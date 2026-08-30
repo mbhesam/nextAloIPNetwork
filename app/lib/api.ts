@@ -1,16 +1,17 @@
-export const DEFAULT_BACKEND_BASE_URL =
-  "http://apialoipnetwork.hesamhelperdomain.ir";
+const resolveApiBaseUrl = (): string => {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const normalizeBackendBaseUrl = (baseUrl: string) => {
-  if (!baseUrl) return DEFAULT_BACKEND_BASE_URL;
-  return baseUrl.replace(/\/+$/, "");
+  if (!configuredUrl) {
+    throw new Error(
+      "Missing backend API URL. Please set NEXT_PUBLIC_API_URL in your .env.local file.",
+    );
+  }
+
+  return configuredUrl.replace(/\/+$/, "");
 };
 
-export const API_BASE_URL = normalizeBackendBaseUrl(
-  process.env.NEXT_PUBLIC_API_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    DEFAULT_BACKEND_BASE_URL,
-);
+export const API_BASE_URL = resolveApiBaseUrl();
 
 export const BACKEND_BASE_URL = API_BASE_URL;
 
