@@ -4,89 +4,19 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import moment from "moment-jalaali";
-import { API_BASE_URL } from "../../lib/api";
+import {
+  acceptSpecialistSupportRequest,
+  completeSpecialistSupportRequest,
+  fetchSpecialistInfo,
+  fetchSpecialistSupportRequests,
+  planLabels,
+  statusConfig,
+  type SpecialistRecord,
+  type SpecialistSupportRequest,
+} from "../../lib/api/specialist-support-requests";
 
-interface SupportRequest {
-  ID: number;
-  CustomerID: number;
-  Customer?: {
-    ID: number;
-    name: string;
-    lastName: string;
-    phoneNumber: string;
-    email: string;
-  };
-  plan: string;
-  CategoryID: number;
-  Category?: {
-    ID: number;
-    name: string;
-    subCategory: string[];
-  };
-  AssignedSpecialistID: number | null;
-  AssignedSpecialist?: {
-    UserID: number;
-    user?: {
-      ID: number;
-      name: string;
-      lastName: string;
-    };
-  };
-  Status: string;
-  description: string;
-  durationMinutes?: number;
-  headTechRequired?: boolean;
-  CreatedAt: string;
-}
-
-interface Specialist {
-  ID: number;
-  userID: number;
-  UserID?: number;
-  skills: string;
-  team?: "platformSubmitted" | "aloOperation";
-  Team?: "platformSubmitted" | "aloOperation";
-  Categories?: Category[];
-  categories?: Category[];
-}
-
-interface Category {
-  id: number;
-  ID?: number;
-  name: string;
-  subCategory: string[];
-}
-
-
-
-const statusConfig: {
-  [key: string]: { label: string; color: string; icon: string };
-} = {
-  created: {
-    label: "ایجاد شده",
-    color: "bg-yellow-100 text-yellow-800",
-    icon: "🟡",
-  },
-  inProgress: {
-    label: "در حال انجام",
-    color: "bg-blue-100 text-blue-800",
-    icon: "🔄",
-  },
-  resolved: {
-    label: "حل شده",
-    color: "bg-green-100 text-green-800",
-    icon: "✅",
-  },
-  cancelled: { label: "لغو شده", color: "bg-red-100 text-red-800", icon: "❌" },
-};
-
-const planLabels: { [key: string]: string } = {
-  instant: "فوری",
-  schedulable: "قابل برنامه‌ریزی",
-  shortStay: "اقامت کوتاه",
-  inPerson: "حضوری",
-  platformPublished: "پلتفرم",
-};
+type SupportRequest = SpecialistSupportRequest;
+type Specialist = SpecialistRecord;
 
 type ModalType = "view" | null;
 
@@ -111,43 +41,22 @@ export default function SpecialistRequestsPage() {
     { value: "cancelled", label: "لغو شده" },
   ];
 
-  // دریافت اطلاعات متخصص فعلی
-  const fetchSpecialistInfo = async () => {
+  const fetchSpecialistData = async () => {
     const token = getAccessToken();
     if (!token) return null;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/specialists?limit=100&offset=0`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        const specialistsArray = Array.isArray(data)
-          ? data
-          : data.data || data.specialists || [];
-
-        // پیدا کردن متخصص مربوط به کاربر فعلی
-        const currentSpecialist = specialistsArray.find(
-          (spec: Specialist) =>
-            spec.userID === user?.ID || spec.UserID === user?.ID,
-        );
-
-        if (currentSpecialist) {
-          setSpecialistInfo(currentSpecialist);
-          return currentSpecialist;
-        }
+      const specialist = await fetchSpecialistInfo(token, user?.ID);
+      if (specialist) {
+        setSpecialistInfo(specialist);
       }
+      return specialist;
     } catch (error) {
       console.error("Error fetching specialist info:", error);
+      return null;
     }
-    return null;
   };
 
-  // دریافت لیست درخواست‌ها
   const fetchRequests = async (specialist: Specialist | null) => {
     const token = getAccessToken();
     if (!token) {
@@ -155,71 +64,14 @@ export default function SpecialistRequestsPage() {
       return;
     }
 
-    const specialistCategoryIds = [
-      ...(specialist?.categories ?? []),
-      ...(specialist?.Categories ?? []),
-    ]
-      .map((category) => category.id ?? category.ID)
-      .filter((categoryId): categoryId is number => categoryId !== undefined)
-      .filter((categoryId, index, categoryIds) => categoryIds.indexOf(categoryId) === index);
-    const specialistTeam = specialist?.team ?? specialist?.Team ?? "aloOperation";
-
-    if (!specialist || specialistCategoryIds.length === 0) {
-      setRequests([]);
-      setShiftMessage("برای این متخصص دسته‌بندی‌ای ثبت نشده است.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      setShiftMessage(null);
-      const responses = await Promise.all(
-        specialistCategoryIds.map((categoryId) =>
-          fetch(`${API_BASE_URL}/v1/support-requests/search`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              categoryId,
-              status: "created",
-              team: specialistTeam,
-              ...(specialistTeam === "aloOperation" && {
-                eligibleSpecialistId: specialist.ID,
-              }),
-            }),
-          }),
-        ),
-      );
-
-      if (responses.some((response) => response.status === 403)) {
-        setRequests([]);
-        setShiftMessage(
-          "در حال حاضر خارج از زمان شیفت خود هستید و درخواست‌های قابل پذیرش نمایش داده نمی‌شوند.",
-        );
-        return;
-      }
-
-      const requestGroups = await Promise.all(
-        responses
-          .filter((response) => response.ok)
-          .map(async (response) => {
-            const data = await response.json();
-            return Array.isArray(data) ? data : data.data || data.requests || [];
-          }),
-      );
-      const requestsArray = requestGroups.flat();
-
-      // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
-      const sorted = [...requestsArray].sort(
-        (a, b) =>
-          new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
-      );
-
-      setRequests(sorted);
+      const { requests, shiftMessage: nextShiftMessage } =
+        await fetchSpecialistSupportRequests(token, specialist);
+      setRequests(requests);
+      setShiftMessage(nextShiftMessage);
     } catch (error) {
       console.error("Error fetching requests:", error);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -231,26 +83,17 @@ export default function SpecialistRequestsPage() {
     if (!token || !specialistInfo) return false;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-requests/${requestId}/complete`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            assignedSpecialistId: specialistInfo.ID,
-            status: "inProgress",
-          }),
-        },
+      const result = await acceptSpecialistSupportRequest(
+        token,
+        specialistInfo.ID,
+        requestId,
       );
 
-      if (response.ok) {
+      if (result.ok) {
         await fetchRequests(specialistInfo);
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -261,31 +104,18 @@ export default function SpecialistRequestsPage() {
     }
   };
 
-  // تکمیل درخواست
   const completeRequest = async (requestId: number) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/support-request/${requestId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            durationMinutes: 60,
-          }),
-        },
-      );
+      const result = await completeSpecialistSupportRequest(token, requestId);
 
-      if (response.ok) {
+      if (result.ok) {
         await fetchRequests(specialistInfo);
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -299,7 +129,7 @@ export default function SpecialistRequestsPage() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const specialist = await fetchSpecialistInfo();
+      const specialist = await fetchSpecialistData();
       await fetchRequests(specialist);
       setLoading(false);
     };

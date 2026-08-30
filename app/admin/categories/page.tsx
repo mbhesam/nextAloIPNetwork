@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { API_BASE_URL } from "../../lib/api";
+import {
+  createCategory,
+  deleteCategory,
+  fetchCategories,
+  updateCategory,
+  type CategoryRecord,
+} from "../../lib/api/admin-categories";
 
-interface Category {
-  id: number;
-  name: string;
-  subCategory: string[]; // تغییر: آرایه از رشته‌ها
-}
-
-
+type Category = CategoryRecord;
 
 type ModalType = "view" | "edit" | "delete" | "create" | null;
 
@@ -29,7 +29,7 @@ export default function AdminCategoriesPage() {
   const [newName, setNewName] = useState("");
   const [newSubCategories, setNewSubCategories] = useState("");
 
-  const fetchCategories = async () => {
+  const loadCategories = async () => {
     const token = getAccessToken();
     if (!token) {
       setLoading(false);
@@ -37,35 +37,8 @@ export default function AdminCategoriesPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/categories`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("داده دریافتی از سرور:", data);
-
-        let categoriesArray = [];
-        if (Array.isArray(data)) {
-          categoriesArray = data;
-        } else if (data.data && Array.isArray(data.data)) {
-          categoriesArray = data.data;
-        } else if (data.categories && Array.isArray(data.categories)) {
-          categoriesArray = data.categories;
-        } else {
-          categoriesArray = [];
-        }
-
-        // نرمال‌سازی بر اساس ساختار واقعی بک‌اند
-        const normalizedCategories = categoriesArray.map((cat: any) => ({
-          id: cat.id || cat.ID || 0,
-          name: cat.name || cat.Name || "",
-          subCategory: cat.subCategory || cat.SubCategory || [],
-        }));
-
-        console.log("دسته‌بندی‌های نرمال شده:", normalizedCategories);
-        setCategories(normalizedCategories);
-      }
+      const normalizedCategories = await fetchCategories(token);
+      setCategories(normalizedCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     } finally {
@@ -73,28 +46,21 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const createCategory = async (categoryData: any) => {
+  const createCategoryRecord = async (categoryData: any) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/category`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: categoryData.name,
-          subCategory: categoryData.subCategory,
-        }),
+      const result = await createCategory(token, {
+        name: categoryData.name,
+        subCategory: categoryData.subCategory,
       });
 
-      if (response.ok) {
-        await fetchCategories();
+      if (result.ok) {
+        await loadCategories();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -105,28 +71,21 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const updateCategory = async (id: number, categoryData: any) => {
+  const updateCategoryRecord = async (id: number, categoryData: any) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/category/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: categoryData.name,
-          subCategory: categoryData.subCategory,
-        }),
+      const result = await updateCategory(token, id, {
+        name: categoryData.name,
+        subCategory: categoryData.subCategory,
       });
 
-      if (response.ok) {
-        await fetchCategories();
+      if (result.ok) {
+        await loadCategories();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -137,23 +96,18 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const deleteCategory = async (id: number) => {
+  const deleteCategoryRecord = async (id: number) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/category/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await deleteCategory(token, id);
 
-      if (response.ok) {
-        await fetchCategories();
+      if (result.ok) {
+        await loadCategories();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -165,7 +119,7 @@ export default function AdminCategoriesPage() {
   };
 
   useEffect(() => {
-    fetchCategories();
+    void loadCategories();
   }, []);
 
   const filteredCategories = categories.filter((category) => {
@@ -204,7 +158,7 @@ export default function AdminCategoriesPage() {
 
   const confirmDelete = async () => {
     if (selectedCategory) {
-      const success = await deleteCategory(selectedCategory.id);
+      const success = await deleteCategoryRecord(selectedCategory.id);
       if (success) {
         closeModal();
       }
@@ -217,7 +171,7 @@ export default function AdminCategoriesPage() {
         .split(",")
         .map((s) => s.trim())
         .filter((s) => s);
-      const success = await updateCategory(selectedCategory.id, {
+      const success = await updateCategoryRecord(selectedCategory.id, {
         name: editName,
         subCategory: subArray,
       });
@@ -237,7 +191,7 @@ export default function AdminCategoriesPage() {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s);
-    const success = await createCategory({
+      const success = await createCategoryRecord({
       name: newName,
       subCategory: subArray,
     });

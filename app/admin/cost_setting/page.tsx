@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { API_BASE_URL } from "../../lib/api";
+import {
+  createCostSetting,
+  deleteCostSetting,
+  fetchCostSettings,
+  updateCostSetting,
+  type CostSettingRecord,
+} from "../../lib/api/admin-cost-settings";
 
-interface CostSetting {
-  ID: number;
-  Plan: string;
-  CostPerHour: number;
-}
-
-
+type CostSetting = CostSettingRecord;
 
 const planLabels: { [key: string]: string } = {
   instant: "فوری",
@@ -25,6 +25,7 @@ const planOptions = [
   { value: "shortStay", label: "کوتاه‌مدت" },
   { value: "schedulable", label: "زمان‌بندی شده" },
   { value: "inPerson", label: "حضوری" },
+  { value: "platformPublished", label: "پلتفرم" },
 ];
 
 type ModalType = "edit" | "delete" | "create" | null;
@@ -46,7 +47,7 @@ export default function AdminCostSettingsPage() {
   });
 
   // دریافت لیست تنظیمات هزینه
-  const fetchCostSettings = async () => {
+  const loadCostSettings = async () => {
     const token = getAccessToken();
     if (!token) {
       setLoading(false);
@@ -54,19 +55,8 @@ export default function AdminCostSettingsPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/cost-settings`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const settingsArray = Array.isArray(data)
-          ? data
-          : data.data || data.costSettings || [];
-        setCostSettings(settingsArray);
-      } else {
-        console.error("Error fetching cost settings:", response.status);
-      }
+      const settingsArray = await fetchCostSettings(token);
+      setCostSettings(settingsArray);
     } catch (error) {
       console.error("Error fetching cost settings:", error);
     } finally {
@@ -75,28 +65,22 @@ export default function AdminCostSettingsPage() {
   };
 
   // ایجاد تنظیمات هزینه جدید
-  const createCostSetting = async (settingData: any) => {
+  const createSetting = async (settingData: any) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/cost-settings`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Plan: settingData.plan,
-          CostPerHour: settingData.costPerHour,
-        }),
+      const result = await createCostSetting(token, {
+        Plan: settingData.plan,
+        CostPerHour: settingData.costPerHour,
+        FixedPrice: null,
       });
 
-      if (response.ok) {
-        await fetchCostSettings();
+      if (result.ok) {
+        await loadCostSettings();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -108,28 +92,22 @@ export default function AdminCostSettingsPage() {
   };
 
   // ویرایش تنظیمات هزینه
-  const updateCostSetting = async (id: number, settingData: any) => {
+  const updateSetting = async (id: number, settingData: any) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/cost-settings/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          Plan: settingData.plan,
-          CostPerHour: settingData.costPerHour,
-        }),
+      const result = await updateCostSetting(token, id, {
+        Plan: settingData.plan,
+        CostPerHour: settingData.costPerHour,
+        FixedPrice: null,
       });
 
-      if (response.ok) {
-        await fetchCostSettings();
+      if (result.ok) {
+        await loadCostSettings();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -141,23 +119,18 @@ export default function AdminCostSettingsPage() {
   };
 
   // حذف تنظیمات هزینه
-  const deleteCostSetting = async (id: number) => {
+  const removeSetting = async (id: number) => {
     const token = getAccessToken();
     if (!token) return false;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/cost-settings/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await deleteCostSetting(token, id);
 
-      if (response.ok) {
-        await fetchCostSettings();
+      if (result.ok) {
+        await loadCostSettings();
         return true;
       } else {
-        const error = await response.text();
+        const error = result.responseText;
         alert(`❌ خطا: ${error}`);
         return false;
       }
@@ -169,16 +142,25 @@ export default function AdminCostSettingsPage() {
   };
 
   useEffect(() => {
-    fetchCostSettings();
+    void loadCostSettings();
   }, []);
 
-  const formatAmount = (amount: number): string => {
-    if (!amount && amount !== 0) return "۰";
-    return new Intl.NumberFormat("fa-IR").format(amount);
+  const formatAmount = (amount: number | null | undefined): string => {
+    const safeAmount = typeof amount === "number" ? amount : 0;
+    if (!safeAmount && safeAmount !== 0) return "۰";
+    return new Intl.NumberFormat("fa-IR").format(safeAmount);
+  };
+
+  const normalizeDigits = (value: string): string => {
+    return value
+      .replace(/[۰-۹]/g, (char) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(char)))
+      .replace(/[٠-٩]/g, (char) => String("٠١٢٣٤٥٦٧٨٩".indexOf(char)))
+      .replace(/[^0-9]/g, "");
   };
 
   const parseAmount = (amountStr: string): number => {
-    return parseInt(amountStr.replace(/[^0-9]/g, "")) || 0;
+    const normalized = normalizeDigits(amountStr);
+    return Number(normalized) || 0;
   };
 
   const filteredSettings = costSettings.filter((setting) => {
@@ -214,7 +196,7 @@ export default function AdminCostSettingsPage() {
 
   const confirmDelete = async () => {
     if (selectedSetting) {
-      const success = await deleteCostSetting(selectedSetting.ID);
+      const success = await removeSetting(selectedSetting.ID);
       if (success) {
         closeModal();
       }
@@ -224,7 +206,7 @@ export default function AdminCostSettingsPage() {
   const saveEdit = async () => {
     if (selectedSetting && formData.plan && formData.costPerHour) {
       const newCost = parseAmount(formData.costPerHour);
-      const success = await updateCostSetting(selectedSetting.ID, {
+      const success = await updateSetting(selectedSetting.ID, {
         plan: formData.plan,
         costPerHour: newCost,
       });
@@ -243,7 +225,7 @@ export default function AdminCostSettingsPage() {
     }
 
     const newCost = parseAmount(formData.costPerHour);
-    const success = await createCostSetting({
+    const success = await createSetting({
       plan: formData.plan,
       costPerHour: newCost,
     });
@@ -491,12 +473,11 @@ export default function AdminCostSettingsPage() {
                   type="text"
                   value={formData.costPerHour}
                   onChange={(e) => {
-                    let val = e.target.value;
-                    val = val.replace(/[^0-9]/g, "");
-                    val = new Intl.NumberFormat("fa-IR").format(
-                      parseInt(val) || 0,
-                    );
-                    setFormData({ ...formData, costPerHour: val });
+                    const rawValue = e.target.value;
+                    const digitsOnly = normalizeDigits(rawValue);
+                    const formattedValue =
+                      digitsOnly === "" ? "" : new Intl.NumberFormat("fa-IR").format(Number(digitsOnly));
+                    setFormData({ ...formData, costPerHour: formattedValue });
                   }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="مثال: ۱,۰۰۰,۰۰۰"
@@ -568,12 +549,11 @@ export default function AdminCostSettingsPage() {
                   type="text"
                   value={formData.costPerHour}
                   onChange={(e) => {
-                    let val = e.target.value;
-                    val = val.replace(/[^0-9]/g, "");
-                    val = new Intl.NumberFormat("fa-IR").format(
-                      parseInt(val) || 0,
-                    );
-                    setFormData({ ...formData, costPerHour: val });
+                    const rawValue = e.target.value;
+                    const digitsOnly = normalizeDigits(rawValue);
+                    const formattedValue =
+                      digitsOnly === "" ? "" : new Intl.NumberFormat("fa-IR").format(Number(digitsOnly));
+                    setFormData({ ...formData, costPerHour: formattedValue });
                   }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="مثال: ۱,۰۰۰,۰۰۰"

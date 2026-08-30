@@ -2,27 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { API_BASE_URL } from "../../lib/api";
+import {
+  createAdminUser,
+  deleteAdminUser,
+  fetchAdminUsers,
+  fetchCities,
+  fetchStates,
+  updateAdminUser,
+  type AdminUserRecord,
+  type UserRole,
+} from "../../lib/api/admin-users";
 
-interface User {
-  ID: number;
-  name: string;
-  lastName: string;
-  phoneNumber: string;
-  email: string;
-  role: "admin" | "specialist" | "customer";
-  budget: number;
-  melliCode?: string;
-  city?: string;
-  state?: string;
-  type?: string;
-  authorized?: boolean;
-  profilePicture?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-
+type User = AdminUserRecord;
 
 const roleColors = {
   admin: "bg-purple-100 text-purple-800",
@@ -43,7 +34,7 @@ const roleOptions = [
   { value: "customer", label: "مشتری" },
 ];
 
-type Role = "admin" | "specialist" | "customer";
+type Role = UserRole;
 type ModalType = "view" | "edit" | "delete" | "create" | null;
 
 export default function AdminUsersPage() {
@@ -147,7 +138,7 @@ export default function AdminUsersPage() {
   // GET /v1/states
   // =========================
 
-  const fetchStates = async () => {
+  const loadStates = async () => {
     const token = getAccessToken();
 
     if (!token) return;
@@ -155,32 +146,11 @@ export default function AdminUsersPage() {
     setLoadingStates(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/states`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        console.error(
-          "Error fetching states:",
-          response.status,
-          await response.text(),
-        );
-        return;
-      }
-
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setStates(data);
-      } else {
-        setStates([]);
-      }
+      const data = await fetchStates(token);
+      setStates(data);
     } catch (error) {
       console.error("Error fetching states:", error);
+      setStates([]);
     } finally {
       setLoadingStates(false);
     }
@@ -191,7 +161,7 @@ export default function AdminUsersPage() {
   // GET /v1/cities?state=...
   // =========================
 
-  const fetchCities = async (state: string, mode: "create" | "edit") => {
+  const loadCities = async (state: string, mode: "create" | "edit") => {
     const token = getAccessToken();
 
     if (!token || !state) {
@@ -211,47 +181,12 @@ export default function AdminUsersPage() {
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/v1/cities?state=${encodeURIComponent(state)}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      const data = await fetchCities(token, state);
 
-      if (!response.ok) {
-        console.error(
-          "Error fetching cities:",
-          response.status,
-          await response.text(),
-        );
-
-        if (mode === "create") {
-          setCities([]);
-        } else {
-          setEditCities([]);
-        }
-
-        return;
-      }
-
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        if (mode === "create") {
-          setCities(data);
-        } else {
-          setEditCities(data);
-        }
+      if (mode === "create") {
+        setCities(data);
       } else {
-        if (mode === "create") {
-          setCities([]);
-        } else {
-          setEditCities([]);
-        }
+        setEditCities(data);
       }
     } catch (error) {
       console.error("Error fetching cities:", error);
@@ -275,7 +210,7 @@ export default function AdminUsersPage() {
   // GET /v1/users
   // =========================
 
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
     const token = getAccessToken();
 
     if (!token) {
@@ -284,30 +219,8 @@ export default function AdminUsersPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/users`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        const usersArray = Array.isArray(data)
-          ? data
-          : data.data || data.users || [];
-
-        setUsers(usersArray);
-      } else {
-        console.error(
-          "Error fetching users:",
-          response.status,
-          await response.text(),
-        );
-      }
+      const usersArray = await fetchAdminUsers(token);
+      setUsers(usersArray);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -343,35 +256,17 @@ export default function AdminUsersPage() {
     setSavingUser(true);
 
     try {
-      console.log("CREATE USER BODY:", userData);
+      const result = await createAdminUser(token, userData);
 
-      const response = await fetch(`${API_BASE_URL}/v1/user`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const responseText = await response.text();
-
-      console.log("CREATE USER STATUS:", response.status);
-
-      console.log("CREATE USER RESPONSE:", responseText);
-
-      // Swagger گفته 201
-      if (response.status === 201 || response.ok) {
-        // دوباره کل لیست را از بک‌اند بگیر
-        await fetchUsers();
-
+      if (result.ok) {
+        await loadUsers();
         return true;
       }
 
-      let errorMessage = responseText;
+      let errorMessage = result.responseText;
 
       try {
-        const errorJson = JSON.parse(responseText);
+        const errorJson = JSON.parse(result.responseText);
 
         errorMessage =
           errorJson.message || errorJson.error || JSON.stringify(errorJson);
@@ -423,30 +318,16 @@ export default function AdminUsersPage() {
     setSavingUser(true);
 
     try {
-      console.log("UPDATE USER:", {
-        id,
-        userData,
-      });
+      const result = await updateAdminUser(token, id, userData);
 
-      const response = await fetch(`${API_BASE_URL}/v1/user/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const responseText = await response.text();
-
-      if (response.ok) {
-        await fetchUsers();
+      if (result.ok) {
+        await loadUsers();
         return true;
       }
 
-      console.error("Update user error:", response.status, responseText);
+      console.error("Update user error:", result.status, result.responseText);
 
-      alert(`❌ خطا در ویرایش کاربر:\n${responseText}`);
+      alert(`❌ خطا در ویرایش کاربر:\n${result.responseText}`);
 
       return false;
     } catch (error) {
@@ -476,23 +357,16 @@ export default function AdminUsersPage() {
     setDeletingUser(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/user/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await deleteAdminUser(token, id);
 
-      const responseText = await response.text();
-
-      if (response.ok) {
-        await fetchUsers();
+      if (result.ok) {
+        await loadUsers();
         return true;
       }
 
-      console.error("Delete user error:", response.status, responseText);
+      console.error("Delete user error:", result.status, result.responseText);
 
-      alert(`❌ خطا در حذف کاربر:\n${responseText}`);
+      alert(`❌ خطا در حذف کاربر:\n${result.responseText}`);
 
       return false;
     } catch (error) {
@@ -511,8 +385,8 @@ export default function AdminUsersPage() {
   // =========================
 
   useEffect(() => {
-    fetchUsers();
-    fetchStates();
+    void loadUsers();
+    void loadStates();
   }, []);
 
   // =========================
@@ -530,7 +404,7 @@ export default function AdminUsersPage() {
       return;
     }
 
-    await fetchCities(state, "create");
+    await loadCities(state, "create");
   };
 
   // =========================
@@ -548,7 +422,7 @@ export default function AdminUsersPage() {
       return;
     }
 
-    await fetchCities(state, "edit");
+    await loadCities(state, "edit");
   };
 
   // =========================
@@ -605,7 +479,7 @@ export default function AdminUsersPage() {
 
     // اگر استان دارد، شهرهایش را بگیر
     if (user.state) {
-      await fetchCities(user.state, "edit");
+      await loadCities(user.state, "edit");
     }
 
     setModalType("edit");

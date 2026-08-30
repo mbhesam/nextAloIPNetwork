@@ -1,9 +1,9 @@
 "use client";
 
 import "./globals.css";
-import AdminNavbar from "./admin/admin_navbar/page";
-import SpecialistsNavbar from "./specialists/specialists_navbar/page";
-import UsersNavbar from "./users/users_navbar/page";
+import AdminNavbar from "./components/AdminNavbar";
+import SpecialistsNavbar from "./components/SpecialistsNavbar";
+import UsersNavbar from "./components/UsersNavbar";
 import { AuthProvider } from "./contexts/AuthContext";
 import NetworkBackground from "./specialists/components/NetworkBackground";
 

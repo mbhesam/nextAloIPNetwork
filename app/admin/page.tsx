@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { API_BASE_URL } from "../lib/api";
+import {
+  fetchDashboardPayments,
+  fetchDashboardShifts,
+  fetchDashboardSpecialists,
+  fetchDashboardSupportRequests,
+  fetchDashboardUsers,
+} from "../lib/api/admin-dashboard";
 
 interface User {
   ID: number;
@@ -115,19 +121,8 @@ export default function AdminDashboardPage() {
   // دریافت تعداد کاربران
   const fetchUsers = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // فرض می‌کنیم response شامل totalCount یا length هست
-        const usersArray = Array.isArray(data)
-          ? data
-          : data.data || data.users || [];
-        setTotalUsers(usersArray.length);
-        // اگر API totalCount برگردوند، از اون استفاده کن
-        if (data.totalCount) setTotalUsers(data.totalCount);
-      }
+      const usersArray = await fetchDashboardUsers(token);
+      setTotalUsers(usersArray.length);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -136,16 +131,8 @@ export default function AdminDashboardPage() {
   // دریافت تعداد متخصصان
   const fetchSpecialists = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/specialists`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const specialistsArray = Array.isArray(data)
-          ? data
-          : data.data || data.specialists || [];
-        setTotalSpecialists(specialistsArray.length);
-      }
+      const specialistsArray = await fetchDashboardSpecialists(token);
+      setTotalSpecialists(specialistsArray.length);
     } catch (error) {
       console.error("Error fetching specialists:", error);
     }
@@ -154,31 +141,21 @@ export default function AdminDashboardPage() {
   // دریافت تراکنش‌ها
   const fetchPayments = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/payments`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const paymentsArray = Array.isArray(data)
-          ? data
-          : data.data || data.payments || [];
+      const paymentsArray = await fetchDashboardPayments(token);
 
-        // محاسبه مجموع مبلغ تراکنش‌های موفق
-        const total = paymentsArray
-          .filter(
-            (p: Payment) =>
-              p.Status === "success" || p.Status === "internal_charge",
-          )
-          .reduce((sum: number, p: Payment) => sum + (p.Amount || 0), 0);
-        setTotalPayments(total);
+      const total = paymentsArray
+        .filter(
+          (p: Payment) =>
+            p.Status === "success" || p.Status === "internal_charge",
+        )
+        .reduce((sum: number, p: Payment) => sum + (p.Amount || 0), 0);
+      setTotalPayments(total);
 
-        // ۵ تراکنش آخر
-        const sorted = [...paymentsArray].sort(
-          (a, b) =>
-            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
-        );
-        setRecentPayments(sorted.slice(0, 5));
-      }
+      const sorted = [...paymentsArray].sort(
+        (a, b) =>
+          new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
+      );
+      setRecentPayments(sorted.slice(0, 5));
     } catch (error) {
       console.error("Error fetching payments:", error);
     }
@@ -187,31 +164,21 @@ export default function AdminDashboardPage() {
   // دریافت درخواست‌های پشتیبانی
   const fetchSupportRequests = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/support-requests`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const requestsArray = Array.isArray(data)
-          ? data
-          : data.data || data.requests || [];
+      const requestsArray = await fetchDashboardSupportRequests(token);
 
-        setTotalRequests(requestsArray.length);
+      setTotalRequests(requestsArray.length);
 
-        // تعداد درخواست‌های در انتظار (created یا inProgress)
-        const pending = requestsArray.filter(
-          (r: SupportRequest) =>
-            r.Status === "created" || r.Status === "inProgress",
-        ).length;
-        setPendingRequests(pending);
+      const pending = requestsArray.filter(
+        (r: SupportRequest) =>
+          r.Status === "created" || r.Status === "inProgress",
+      ).length;
+      setPendingRequests(pending);
 
-        // ۴ درخواست آخر
-        const sorted = [...requestsArray].sort(
-          (a, b) =>
-            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
-        );
-        setRecentRequests(sorted.slice(0, 4));
-      }
+      const sorted = [...requestsArray].sort(
+        (a, b) =>
+          new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime(),
+      );
+      setRecentRequests(sorted.slice(0, 4));
     } catch (error) {
       console.error("Error fetching support requests:", error);
     }
@@ -220,16 +187,8 @@ export default function AdminDashboardPage() {
   // دریافت شیفت‌ها
   const fetchShifts = async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/shifts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const shiftsArray = Array.isArray(data)
-          ? data
-          : data.data || data.shifts || [];
-        setTotalShifts(shiftsArray.length);
-      }
+      const shiftsArray = await fetchDashboardShifts(token);
+      setTotalShifts(shiftsArray.length);
     } catch (error) {
       console.error("Error fetching shifts:", error);
     }
