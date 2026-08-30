@@ -12,6 +12,8 @@ export interface SpecialistRecord {
   userID: number;
   UserID?: number;
   skills: string;
+  specialistTeam?: "platformSubmitted" | "aloOperation";
+  SpecialistTeam?: "platformSubmitted" | "aloOperation";
   team?: "platformSubmitted" | "aloOperation";
   Team?: "platformSubmitted" | "aloOperation";
   Categories?: SpecialistCategory[];
@@ -47,6 +49,7 @@ export interface SpecialistSupportRequest {
     };
   };
   Status: string;
+  retries?: number;
   description: string;
   durationMinutes?: number;
   headTechRequired?: boolean;
@@ -130,7 +133,12 @@ export const fetchSpecialistSupportRequests = async (
         categoryIds.indexOf(categoryId) === index,
     );
 
-  const specialistTeam = specialist?.team ?? specialist?.Team ?? "aloOperation";
+  const specialistTeam =
+    specialist?.specialistTeam ??
+    specialist?.SpecialistTeam ??
+    specialist?.team ??
+    specialist?.Team ??
+    "aloOperation";
 
   if (specialistCategoryIds.length === 0) {
     return {
@@ -151,7 +159,7 @@ export const fetchSpecialistSupportRequests = async (
           body: JSON.stringify({
             categoryId,
             status: "created",
-            team: specialistTeam,
+            specialistTeam,
             ...(specialistTeam === "aloOperation" && {
               eligibleSpecialistId: specialist.ID,
             }),

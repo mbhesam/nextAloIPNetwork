@@ -39,6 +39,10 @@ interface SupportRequest {
   CreatedAt: string;
 }
 
+const shouldRequireSeniorTech = (request: SupportRequest) => {
+  return Boolean(request.headTechRequired) || (request.retries ?? 0) >= 2;
+};
+
 interface Specialist {
   ID: number;
   userID: number;
@@ -456,7 +460,7 @@ export default function AdminSupportRequestsPage() {
                         >
                           {request.Category?.name || "—"}
                         </span>
-                        {request.headTechRequired && (
+                        {shouldRequireSeniorTech(request) && (
                           <span className="mr-2 px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
                             نیازمند تکنسین ارشد
                           </span>
@@ -529,7 +533,7 @@ export default function AdminSupportRequestsPage() {
                       <span className="text-xs text-gray-500">پلن:</span>{" "}
                       {planLabels[request.plan] || request.plan}
                     </div>
-                        {request.headTechRequired && (
+                        {shouldRequireSeniorTech(request) && (
                           <div className="col-span-2 text-red-700 font-medium">
                             این درخواست به بررسی تکنسین ارشد نیاز دارد.
                           </div>
@@ -645,7 +649,7 @@ export default function AdminSupportRequestsPage() {
                   <label className="text-sm text-gray-500">متخصص</label>
                   <p>{getSpecialistName(selectedRequest)}</p>
                 </div>
-                {selectedRequest.headTechRequired && (
+                {shouldRequireSeniorTech(selectedRequest) && (
                   <div className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
                     این درخواست به بررسی تکنسین ارشد نیاز دارد.
                   </div>

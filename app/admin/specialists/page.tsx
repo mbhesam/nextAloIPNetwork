@@ -196,7 +196,7 @@ export default function AdminSpecialistsPage() {
       specialistData.categoryIds.forEach((categoryId: number) => {
         formData.append("categoryIds", String(categoryId));
       });
-      formData.append("team", specialistData.team);
+      formData.append("specialistTeam", specialistData.specialistTeam ?? specialistData.team ?? "aloOperation");
       formData.append("skillAuthorized", "true");
       formData.append("active", "true");
 
@@ -400,7 +400,7 @@ export default function AdminSpecialistsPage() {
       userId: newUserId,
       skills: newSkills,
       categoryIds,
-      team: newTeam,
+      specialistTeam: newTeam,
     });
 
     if (success) {

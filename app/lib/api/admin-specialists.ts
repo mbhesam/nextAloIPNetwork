@@ -12,6 +12,8 @@ export interface AdminSpecialistRecord {
   UserID: number;
   Skills: string;
   Categories: SpecialistCategory[];
+  specialistTeam?: string;
+  SpecialistTeam?: string;
   team?: string;
   user?: {
     ID: number;
@@ -39,7 +41,7 @@ export const createAdminSpecialist = async (
     userId: number;
     skills: string;
     categoryIds: number[];
-    team: "aloOperation" | "platformSubmitted";
+    specialistTeam: "aloOperation" | "platformSubmitted";
   },
 ) => {
   const formData = new FormData();
@@ -50,7 +52,7 @@ export const createAdminSpecialist = async (
     formData.append("categoryIds", String(categoryId));
   });
 
-  formData.append("team", specialistData.team);
+  formData.append("specialistTeam", specialistData.specialistTeam);
   formData.append("skillAuthorized", "true");
   formData.append("active", "true");
 

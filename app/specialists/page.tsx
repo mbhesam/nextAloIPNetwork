@@ -34,6 +34,7 @@ interface SupportRequest {
     };
   };
   Status: string;
+  retries?: number;
   description: string;
   durationMinutes?: number;
   headTechRequired?: boolean;
@@ -48,6 +49,8 @@ interface Specialist {
   userID: number;
   UserID?: number;
   skills: string;
+  specialistTeam?: "platformSubmitted" | "aloOperation";
+  SpecialistTeam?: "platformSubmitted" | "aloOperation";
   team?: "platformSubmitted" | "aloOperation";
   Team?: "platformSubmitted" | "aloOperation";
   categories?: Category[];
@@ -273,7 +276,12 @@ export default function SpecialistDashboardPage() {
       .map((category) => category.id ?? category.ID)
       .filter((categoryId): categoryId is number => categoryId !== undefined)
       .filter((categoryId, index, categoryIds) => categoryIds.indexOf(categoryId) === index);
-    const specialistTeam = specialist?.team ?? specialist?.Team ?? "aloOperation";
+    const specialistTeam =
+      specialist?.specialistTeam ??
+      specialist?.SpecialistTeam ??
+      specialist?.team ??
+      specialist?.Team ??
+      "aloOperation";
 
     if (!specialist || specialistCategoryIds.length === 0) {
       setAcceptableRequests([]);
@@ -293,7 +301,7 @@ export default function SpecialistDashboardPage() {
             body: JSON.stringify({
               categoryId,
               status: "created",
-              team: specialistTeam,
+              specialistTeam,
               ...(specialistTeam === "aloOperation" && {
                 eligibleSpecialistId: specialist.ID,
               }),
@@ -549,8 +557,12 @@ export default function SpecialistDashboardPage() {
     }
   };
 
+  const shouldRequireSeniorTech = (request: SupportRequest) => {
+    return Boolean(request.headTechRequired) || (request.retries ?? 0) >= 2;
+  };
+
   const handleComplete = async (request: SupportRequest) => {
-    if (request.headTechRequired) {
+    if (shouldRequireSeniorTech(request)) {
       alert("این درخواست به بررسی تکنسین ارشد نیاز دارد");
       return;
     }
@@ -807,14 +819,14 @@ export default function SpecialistDashboardPage() {
                         {request.Status === "inProgress" && (
                           <button
                             onClick={() => handleComplete(request)}
-                            disabled={request.headTechRequired}
+                            disabled={shouldRequireSeniorTech(request)}
                             title={
-                              request.headTechRequired
+                              shouldRequireSeniorTech(request)
                                 ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
                                 : undefined
                             }
                             className={`px-3 py-1 rounded-md ${
-                              request.headTechRequired
+                              shouldRequireSeniorTech(request)
                                 ? "cursor-not-allowed text-gray-400"
                                 : "text-green-600 hover:bg-green-50"
                             }`}
@@ -871,14 +883,14 @@ export default function SpecialistDashboardPage() {
                   {request.Status === "inProgress" && (
                     <button
                       onClick={() => handleComplete(request)}
-                      disabled={request.headTechRequired}
+                      disabled={shouldRequireSeniorTech(request)}
                       title={
-                        request.headTechRequired
+                        shouldRequireSeniorTech(request)
                           ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
                           : undefined
                       }
                       className={`flex-1 py-2 text-sm ${
-                        request.headTechRequired
+                        shouldRequireSeniorTech(request)
                           ? "cursor-not-allowed text-gray-400"
                           : "text-green-600 hover:bg-green-50"
                       }`}
@@ -1129,14 +1141,14 @@ export default function SpecialistDashboardPage() {
                     handleComplete(selectedRequest);
                     closeModal();
                   }}
-                  disabled={selectedRequest.headTechRequired}
+                  disabled={shouldRequireSeniorTech(selectedRequest)}
                   title={
-                    selectedRequest.headTechRequired
+                    shouldRequireSeniorTech(selectedRequest)
                       ? "این درخواست به بررسی تکنسین ارشد نیاز دارد"
                       : undefined
                   }
                   className={`px-4 py-2 text-white rounded-lg ${
-                    selectedRequest.headTechRequired
+                    shouldRequireSeniorTech(selectedRequest)
                       ? "cursor-not-allowed bg-gray-400"
                       : "bg-green-600 hover:bg-green-700"
                   }`}

@@ -88,6 +88,10 @@ export default function UserRequestsPage() {
     null,
   );
 
+  const shouldRequireSeniorTech = (request: SupportRequest) => {
+    return Boolean(request.headTechRequired) || (request.retries ?? 0) >= 2;
+  };
+
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -463,7 +467,7 @@ export default function UserRequestsPage() {
                         >
                           {request.Category?.name || "—"}
                         </span>
-                        {request.headTechRequired && (
+                        {shouldRequireSeniorTech(request) && (
                           <span className="text-xs font-medium text-red-700">
                             نیازمند تکنسین ارشد
                           </span>
@@ -551,7 +555,7 @@ export default function UserRequestsPage() {
                 <div className="text-sm text-gray-600 mb-3">
                   تاریخ: {formatDate(request.CreatedAt)}
                 </div>
-                {request.headTechRequired && (
+                {shouldRequireSeniorTech(request) && (
                   <div className="text-sm font-medium text-red-700 mb-3">
                     نیازمند تکنسین ارشد
                   </div>
@@ -657,7 +661,7 @@ export default function UserRequestsPage() {
                   <p>{selectedRequest.Category?.name || "—"}</p>
                 </div>
 
-                {selectedRequest.headTechRequired && (
+                {shouldRequireSeniorTech(selectedRequest) && (
                   <div className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
                     این درخواست به بررسی تکنسین ارشد نیاز دارد.
                   </div>
