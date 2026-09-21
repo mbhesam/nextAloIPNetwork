@@ -20,6 +20,8 @@ export interface SupportRequestListItem {
   CreatedAt: string;
   description?: string;
   CustomerID: number;
+  durationMinutes?: number;
+  endRejectionReason?: string;
 }
 
 export const fetchUserSupportRequests = async (
@@ -40,32 +42,39 @@ export const fetchUserSupportRequests = async (
   if (!response.ok) return [];
 
   const data = await response.json();
-  const requestsArray = Array.isArray(data) ? data : data.data || data.requests || [];
+  const requestsArray = Array.isArray(data)
+    ? data
+    : data.data || data.requests || [];
 
-  return [...requestsArray].sort((a, b) => Number(b.ID ?? b.id) - Number(a.ID ?? a.id));
+  return [...requestsArray].sort(
+    (a, b) => Number(b.ID ?? b.id) - Number(a.ID ?? a.id),
+  );
 };
 
 export const finishSupportRequest = async (
   token: string,
   requestId: number,
   endApproved: boolean,
-  rejectionReason?: string,
+  endRejectionReason?: string,
 ) => {
-  const response = await fetch(`${API_BASE_URL}/v1/support-requests/${requestId}/finish`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_BASE_URL}/v1/support-requests/${requestId}/finish`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        endApproved
+          ? { endApproved: true }
+          : {
+              endApproved: false,
+              endRejectionReason: endRejectionReason?.trim(),
+            },
+      ),
     },
-    body: JSON.stringify(
-      endApproved
-        ? { endApproved: true }
-        : {
-            endApproved: false,
-            endRejectionReason: rejectionReason?.trim(),
-          },
-    ),
-  });
+  );
 
   return {
     ok: response.ok,
@@ -75,17 +84,23 @@ export const finishSupportRequest = async (
   };
 };
 
-export const cancelSupportRequest = async (token: string, requestId: number) => {
-  const response = await fetch(`${API_BASE_URL}/v1/support-request/${requestId}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+export const cancelSupportRequest = async (
+  token: string,
+  requestId: number,
+) => {
+  const response = await fetch(
+    `${API_BASE_URL}/v1/support-request/${requestId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status: "cancelled",
+      }),
     },
-    body: JSON.stringify({
-      status: "cancelled",
-    }),
-  });
+  );
 
   return {
     ok: response.ok,

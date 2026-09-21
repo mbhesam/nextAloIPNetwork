@@ -7,8 +7,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "../lib/api";
 
-
-
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -23,7 +21,6 @@ export default function RegisterPage() {
     agreeTerms: false,
     state: "",
     city: "",
-    // فیلدهای مخصوص کاربر حقوقی
     companyName: "",
     economicCode: "",
     registrationNumber: "",
@@ -40,13 +37,11 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [serverError, setServerError] = useState("");
 
-  // State های مربوط به استان و شهر
   const [states, setStates] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
 
-  // دریافت لیست استان‌ها
   const fetchStates = async () => {
     setLoadingStates(true);
     try {
@@ -85,7 +80,6 @@ export default function RegisterPage() {
     }
   };
 
-  // دریافت لیست شهرها بر اساس استان انتخاب شده
   const fetchCities = async (stateName: string) => {
     if (!stateName) {
       setCities([]);
@@ -148,7 +142,6 @@ export default function RegisterPage() {
     }
   };
 
-  // اعتبارسنجی کد ملی
   const validateNationalCode = (code: string): boolean => {
     if (!/^\d{10}$/.test(code)) return false;
 
@@ -168,7 +161,6 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    // فیلدهای مشترک
     if (!formData.firstName.trim()) {
       newErrors.firstName = "نام را وارد کنید";
     } else if (formData.firstName.length < 2) {
@@ -213,7 +205,6 @@ export default function RegisterPage() {
       newErrors.agreeTerms = "باید قوانین و مقررات را بپذیرید";
     }
 
-    // اعتبارسنجی بر اساس نوع حساب
     if (formData.accountType === "national") {
       if (!formData.nationalCode.trim()) {
         newErrors.nationalCode = "کد ملی را وارد کنید";
@@ -246,7 +237,6 @@ export default function RegisterPage() {
     setServerError("");
 
     try {
-      // مرحله 1: ثبت‌نام کاربر عادی
       const userPayload: any = {
         name: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -296,7 +286,6 @@ export default function RegisterPage() {
       const newUserId = userData.ID || userData.id;
       console.log("User created with ID:", newUserId);
 
-      // مرحله 2: اگر کاربر حقوقی است، اطلاعات شرکت را ثبت کن
       if (formData.accountType === "legal" && newUserId) {
         console.log("Step 2: Creating legal user...");
 
@@ -338,7 +327,6 @@ export default function RegisterPage() {
         }
       }
 
-      // موفقیت آمیز
       const successMessage =
         formData.accountType === "national"
           ? "✅ ثبت‌نام با موفقیت انجام شد. لطفاً وارد شوید."
@@ -354,9 +342,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-8 px-4">
-      <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 to-blue-950 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-2xl">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-6">
             <div className="text-center mb-6">
               <Image
@@ -366,14 +363,14 @@ export default function RegisterPage() {
                 alt="لوگوی AloIP Network"
                 className="mx-auto mb-4"
               />
-              <h1 className="text-2xl font-bold text-gray-800">✨ ثبت‌نام</h1>
-              <p className="text-gray-500 text-sm mt-1">
+              <h1 className="text-2xl font-bold text-white/90">✨ ثبت‌نام</h1>
+              <p className="text-white/50 text-sm mt-1">
                 عضو خانواده AloIPNetwork شوید
               </p>
             </div>
 
             {serverError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
+              <div className="mb-4 p-3 bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl text-red-200 text-sm text-center">
                 ❌ {serverError}
               </div>
             )}
@@ -399,8 +396,8 @@ export default function RegisterPage() {
                 }
                 className={`flex-1 py-3 rounded-xl font-medium transition-all ${
                   formData.accountType === "national"
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-500/30 text-white border border-blue-400/30 shadow-lg shadow-blue-500/10"
+                    : "bg-white/10 text-white/50 border border-white/10 hover:bg-white/20"
                 }`}
               >
                 👤 حساب حقیقی
@@ -416,8 +413,8 @@ export default function RegisterPage() {
                 }
                 className={`flex-1 py-3 rounded-xl font-medium transition-all ${
                   formData.accountType === "legal"
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-500/30 text-white border border-blue-400/30 shadow-lg shadow-blue-500/10"
+                    : "bg-white/10 text-white/50 border border-white/10 hover:bg-white/20"
                 }`}
               >
                 🏢 حساب حقوقی
@@ -428,7 +425,7 @@ export default function RegisterPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     نام *
                   </label>
                   <input
@@ -437,18 +434,18 @@ export default function RegisterPage() {
                     value={formData.firstName}
                     onChange={handleChange}
                     placeholder="علی"
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.firstName ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.firstName ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.firstName && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-300 text-xs mt-1">
                       {errors.firstName}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     نام خانوادگی *
                   </label>
                   <input
@@ -457,12 +454,12 @@ export default function RegisterPage() {
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="رضایی"
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.lastName ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.lastName ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.lastName && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-300 text-xs mt-1">
                       {errors.lastName}
                     </p>
                   )}
@@ -472,7 +469,7 @@ export default function RegisterPage() {
               {/* Contact Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     شماره تلفن *
                   </label>
                   <input
@@ -483,16 +480,16 @@ export default function RegisterPage() {
                     placeholder="09123456789"
                     dir="ltr"
                     maxLength={11}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.phone ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.phone ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.phone && (
-                    <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                    <p className="text-red-300 text-xs mt-1">{errors.phone}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     ایمیل (اختیاری)
                   </label>
                   <input
@@ -502,12 +499,12 @@ export default function RegisterPage() {
                     onChange={handleChange}
                     placeholder="example@email.com"
                     dir="ltr"
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.email ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.email ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    <p className="text-red-300 text-xs mt-1">{errors.email}</p>
                   )}
                 </div>
               </div>
@@ -515,7 +512,7 @@ export default function RegisterPage() {
               {/* Password Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     رمز عبور *
                   </label>
                   <input
@@ -524,18 +521,18 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="حداقل ۶ کاراکتر"
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.password ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.password ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.password && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-300 text-xs mt-1">
                       {errors.password}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     تکرار رمز عبور *
                   </label>
                   <input
@@ -544,14 +541,14 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="رمز عبور را مجدد وارد کنید"
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
                       errors.confirmPassword
-                        ? "border-red-500"
-                        : "border-gray-300"
+                        ? "border-red-400"
+                        : "border-white/20"
                     }`}
                   />
                   {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-300 text-xs mt-1">
                       {errors.confirmPassword}
                     </p>
                   )}
@@ -561,7 +558,7 @@ export default function RegisterPage() {
               {/* Fields based on account type */}
               {formData.accountType === "national" ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     کد ملی *
                   </label>
                   <input
@@ -572,12 +569,12 @@ export default function RegisterPage() {
                     placeholder="1234567890"
                     dir="ltr"
                     maxLength={10}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
-                      errors.nationalCode ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
+                      errors.nationalCode ? "border-red-400" : "border-white/20"
                     }`}
                   />
                   {errors.nationalCode && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-300 text-xs mt-1">
                       {errors.nationalCode}
                     </p>
                   )}
@@ -585,7 +582,7 @@ export default function RegisterPage() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white/80 mb-2">
                       نام شرکت *
                     </label>
                     <input
@@ -594,21 +591,21 @@ export default function RegisterPage() {
                       value={formData.companyName}
                       onChange={handleChange}
                       placeholder="نام شرکت خود را وارد کنید"
-                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
+                      className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
                         errors.companyName
-                          ? "border-red-500"
-                          : "border-gray-300"
+                          ? "border-red-400"
+                          : "border-white/20"
                       }`}
                     />
                     {errors.companyName && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-300 text-xs mt-1">
                         {errors.companyName}
                       </p>
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         شماره ثبت *
                       </label>
                       <input
@@ -618,20 +615,20 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="شماره ثبت"
                         dir="ltr"
-                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
+                        className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
                           errors.registrationNumber
-                            ? "border-red-500"
-                            : "border-gray-300"
+                            ? "border-red-400"
+                            : "border-white/20"
                         }`}
                       />
                       {errors.registrationNumber && (
-                        <p className="text-red-500 text-xs mt-1">
+                        <p className="text-red-300 text-xs mt-1">
                           {errors.registrationNumber}
                         </p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         تلفن شرکت *
                       </label>
                       <input
@@ -641,21 +638,21 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="02112345678"
                         dir="ltr"
-                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 ${
+                        className={`w-full px-4 py-3 border rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all ${
                           errors.companyPhone
-                            ? "border-red-500"
-                            : "border-gray-300"
+                            ? "border-red-400"
+                            : "border-white/20"
                         }`}
                       />
                       {errors.companyPhone && (
-                        <p className="text-red-500 text-xs mt-1">
+                        <p className="text-red-300 text-xs mt-1">
                           {errors.companyPhone}
                         </p>
                       )}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white/80 mb-2">
                       آدرس شرکت
                     </label>
                     <textarea
@@ -664,12 +661,12 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       placeholder="آدرس کامل شرکت"
                       rows={2}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         وب‌سایت
                       </label>
                       <input
@@ -679,11 +676,11 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="https://example.com"
                         dir="ltr"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         کد اقتصادی
                       </label>
                       <input
@@ -693,13 +690,13 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="کد اقتصادی"
                         dir="ltr"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         نام نماینده 1
                       </label>
                       <input
@@ -708,11 +705,11 @@ export default function RegisterPage() {
                         value={formData.agentName1}
                         onChange={handleChange}
                         placeholder="نام نماینده"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         تلفن نماینده 1
                       </label>
                       <input
@@ -722,13 +719,13 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="09123456789"
                         dir="ltr"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         نام نماینده 2
                       </label>
                       <input
@@ -737,11 +734,11 @@ export default function RegisterPage() {
                         value={formData.agentName2}
                         onChange={handleChange}
                         placeholder="نام نماینده"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         تلفن نماینده 2
                       </label>
                       <input
@@ -751,7 +748,7 @@ export default function RegisterPage() {
                         onChange={handleChange}
                         placeholder="09123456789"
                         dir="ltr"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       />
                     </div>
                   </div>
@@ -761,7 +758,7 @@ export default function RegisterPage() {
               {/* State and City Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     استان *
                   </label>
                   <select
@@ -769,26 +766,39 @@ export default function RegisterPage() {
                     value={formData.state}
                     onChange={handleChange}
                     disabled={loadingStates}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(8px)',
+                      color: 'white',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
                   >
-                    <option value="">انتخاب کنید...</option>
+                    <option value="" style={{ backgroundColor: '#4a4a4a', color: 'white' }}>
+                      انتخاب کنید...
+                    </option>
                     {states.map((state) => (
-                      <option key={state} value={state}>
+                      <option key={state} value={state} style={{ backgroundColor: '#4a4a4a', color: 'white' }}>
                         {state}
                       </option>
                     ))}
                   </select>
                   {loadingStates && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-white/40 mt-1">
                       در حال بارگذاری...
                     </p>
                   )}
                   {errors.state && (
-                    <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+                    <p className="text-red-300 text-xs mt-1">{errors.state}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     شهر *
                   </label>
                   <select
@@ -796,9 +806,20 @@ export default function RegisterPage() {
                     value={formData.city}
                     onChange={handleChange}
                     disabled={!formData.state || loadingCities}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(8px)',
+                      color: 'white',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
                   >
-                    <option value="">
+                    <option value="" style={{ backgroundColor: '#4a4a4a', color: 'white' }}>
                       {!formData.state
                         ? "ابتدا استان را انتخاب کنید"
                         : loadingCities
@@ -806,13 +827,13 @@ export default function RegisterPage() {
                           : "انتخاب کنید..."}
                     </option>
                     {cities.map((city) => (
-                      <option key={city} value={city}>
+                      <option key={city} value={city} style={{ backgroundColor: '#4a4a4a', color: 'white' }}>
                         {city}
                       </option>
                     ))}
                   </select>
                   {errors.city && (
-                    <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                    <p className="text-red-300 text-xs mt-1">{errors.city}</p>
                   )}
                 </div>
               </div>
@@ -824,13 +845,13 @@ export default function RegisterPage() {
                   name="agreeTerms"
                   checked={formData.agreeTerms}
                   onChange={handleChange}
-                  className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                  className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-blue-400 focus:ring-offset-0"
                 />
-                <label className="text-sm text-gray-600">
+                <label className="text-sm text-white/60">
                   <span>قوانین و مقررات </span>
                   <Link
                     href="/terms"
-                    className="text-indigo-600 hover:text-indigo-700"
+                    className="text-blue-300 hover:text-blue-200"
                   >
                     AloIPNetwork
                   </Link>
@@ -838,7 +859,7 @@ export default function RegisterPage() {
                 </label>
               </div>
               {errors.agreeTerms && (
-                <p className="text-red-500 text-xs">{errors.agreeTerms}</p>
+                <p className="text-red-300 text-xs">{errors.agreeTerms}</p>
               )}
 
               {/* Submit Button */}
@@ -847,8 +868,8 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 className={`w-full py-3 rounded-xl font-medium text-white transition-all ${
                   isLoading
-                    ? "bg-indigo-400 cursor-not-allowed"
-                    : "bg-indigo-600 hover:bg-indigo-700 shadow-lg"
+                    ? "bg-blue-500/50 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/20"
                 }`}
               >
                 {isLoading ? (
@@ -864,12 +885,12 @@ export default function RegisterPage() {
           </div>
 
           {/* Login Link */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="px-6 py-4 bg-white/5 backdrop-blur-sm border-t border-white/10 text-center">
+            <p className="text-sm text-white/60">
               قبلاً ثبت‌نام کرده‌اید؟{" "}
               <Link
                 href="/login"
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-blue-300 hover:text-blue-200 font-medium"
               >
                 وارد شوید
               </Link>
@@ -877,9 +898,9 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-white/30 mt-6">
           ثبت‌نام شما به معنای پذیرش{" "}
-          <Link href="/terms" className="text-indigo-500 hover:underline">
+          <Link href="/terms" className="text-blue-300/60 hover:text-blue-300">
             قوانین و مقررات
           </Link>{" "}
           است
@@ -887,4 +908,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-}
+} 

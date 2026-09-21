@@ -20,32 +20,32 @@ const statusConfig: {
 } = {
   created: {
     label: "ایجاد شده",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-yellow-500/20 text-white",
     icon: "🟡",
   },
   inProgress: {
     label: "در حال انجام",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-blue-500/20 text-white",
     icon: "🔄",
   },
   waitingApproval: {
     label: "در انتظار تأیید مشتری",
-    color: "bg-orange-100 text-orange-800",
+    color: "bg-orange-500/20 text-white",
     icon: "⏳",
   },
   done: {
     label: "تکمیل شده",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-500/20 text-white",
     icon: "✅",
   },
   resolved: {
     label: "حل شده",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-500/20 text-white",
     icon: "✅",
   },
   cancelled: {
     label: "لغو شده",
-    color: "bg-red-100 text-red-800",
+    color: "bg-red-500/20 text-white",
     icon: "❌",
   },
 };
@@ -67,12 +67,12 @@ const planIcons: { [key: string]: string } = {
 };
 
 const categoryColors: { [key: string]: string } = {
-  firewall: "bg-red-100 text-red-800",
-  routing: "bg-blue-100 text-blue-800",
-  "routing&switching": "bg-blue-100 text-blue-800",
-  sambal: "bg-purple-100 text-purple-800",
-  security: "bg-green-100 text-green-800",
-  cloud: "bg-cyan-100 text-cyan-800",
+  firewall: "bg-red-500/20 text-white",
+  routing: "bg-blue-500/20 text-white",
+  "routing&switching": "bg-blue-500/20 text-white",
+  sambal: "bg-purple-500/20 text-white",
+  security: "bg-green-500/30 text-white",
+  cloud: "bg-cyan-500/20 text-white",
 };
 
 export default function UserRequestsPage() {
@@ -154,8 +154,10 @@ export default function UserRequestsPage() {
   // =========================
 
   const getCategoryColor = (categoryName?: string) => {
-    if (!categoryName) return "bg-gray-100 text-gray-700";
-    return categoryColors[categoryName.toLowerCase()] || "bg-gray-100 text-gray-700";
+    if (!categoryName) return "bg-white/20 text-gray-700";
+    return (
+      categoryColors[categoryName.toLowerCase()] || "bg-white/20 text-gray-700"
+    );
   };
 
   const filteredRequests = requests.filter((request) => {
@@ -223,7 +225,11 @@ export default function UserRequestsPage() {
         await fetchRequests();
         setShowFinishModal(false);
         setSelectedRequest(null);
-        alert(endApproved ? "پایان درخواست تأیید شد" : "درخواست برای بررسی مجدد بازگشت داده شد");
+        alert(
+          endApproved
+            ? "پایان درخواست تأیید شد"
+            : "درخواست برای بررسی مجدد بازگشت داده شد",
+        );
       } else {
         alert(`❌ خطا: ${result.responseText}`);
       }
@@ -353,7 +359,7 @@ export default function UserRequestsPage() {
             Actions
         ========================= */}
 
-        <div className="bg-white rounded-xl shadow-lg p-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             {/* Search */}
 
@@ -363,7 +369,7 @@ export default function UserRequestsPage() {
                 placeholder="جستجو بر اساس شناسه، طرح یا دسته‌بندی..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 pr-10 border border-gray-300/50 rounded-lg bg-white/50 backdrop-blur-sm text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
 
               <svg
@@ -386,10 +392,28 @@ export default function UserRequestsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                backgroundColor: "rgba(255,255,255,0.1)",
+                backdropFilter: "blur(8px)",
+                color: "white",
+                outline: "none",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option
+                  key={option.value}
+                  value={option.value}
+                  style={{
+                    backgroundColor: "#4a4a4a",
+                    color: "white",
+                    padding: "8px",
+                  }}
+                >
                   {option.label}
                 </option>
               ))}
@@ -399,7 +423,7 @@ export default function UserRequestsPage() {
 
             <button
               onClick={handleResetFilters}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 text-gray-700 bg-white/50 backdrop-blur-sm rounded-lg hover:bg-white/80 transition-colors border border-gray-300/50"
             >
               حذف فیلترها
             </button>
@@ -410,48 +434,48 @@ export default function UserRequestsPage() {
             Desktop Table
         ========================= */}
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-xl shadow-lg overflow-hidden">
           <div className="hidden md:block overflow-auto max-h-[49vh]">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200/50">
+              <thead className="bg-white/40">
                 <tr>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     شناسه
                   </th>
 
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     طرح
                   </th>
 
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     دسته‌بندی
                   </th>
 
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     وضعیت
                   </th>
 
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     تاریخ ایجاد
                   </th>
 
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-600">
                     عملیات
                   </th>
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200/30">
                 {filteredRequests.map((request) => (
                   <tr
                     key={request.ID}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-white/40 transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-800">
                       #{request.ID}
                     </td>
 
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm text-gray-800">
                       <span className="flex items-center gap-1">
                         {getPlanIcon(request.plan)}
 
@@ -468,7 +492,7 @@ export default function UserRequestsPage() {
                           {request.Category?.name || "—"}
                         </span>
                         {shouldRequireSeniorTech(request) && (
-                          <span className="text-xs font-medium text-red-700">
+                          <span className="text-xs font-medium text-white bg-red-700 p-2 rounded-2xl">
                             نیازمند تکنسین ارشد
                           </span>
                         )}
@@ -479,7 +503,7 @@ export default function UserRequestsPage() {
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
                           statusConfig[request.Status]?.color ||
-                          "bg-gray-100 text-gray-700"
+                          "bg-white/30 text-gray-700"
                         }`}
                       >
                         {statusConfig[request.Status]?.icon}{" "}
@@ -487,15 +511,15 @@ export default function UserRequestsPage() {
                       </span>
                     </td>
 
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-600">
                       {formatDate(request.CreatedAt)}
                     </td>
 
                     <td className="px-6 py-4 text-sm">
-                      <div className="flex gap-2">
+                      <div className="flex gap-5">
                         <button
                           onClick={() => handleView(request)}
-                          className="text-indigo-600 hover:text-indigo-900 font-medium"
+                          className="text-indigo-300 hover:text-indigo-900 font-medium transition"
                         >
                           مشاهده
                         </button>
@@ -504,7 +528,7 @@ export default function UserRequestsPage() {
                           request.Status === "inProgress") && (
                           <button
                             onClick={() => handleCancel(request)}
-                            className="text-red-600 hover:text-red-900 font-medium"
+                            className="text-red-400 hover:text-red-900 font-medium transition"
                           >
                             لغو
                           </button>
@@ -521,16 +545,16 @@ export default function UserRequestsPage() {
               Mobile
           ========================= */}
 
-          <div className="md:hidden divide-y divide-gray-200">
+          <div className="md:hidden divide-y divide-gray-200/30">
             {filteredRequests.map((request) => (
-              <div key={request.ID} className="p-4 hover:bg-gray-50">
+              <div key={request.ID} className="p-4 hover:bg-white/40">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs text-gray-500">#{request.ID}</span>
 
                   <span
                     className={`px-2 py-0.5 text-xs rounded-full ${
                       statusConfig[request.Status]?.color ||
-                      "bg-gray-100 text-gray-700"
+                      "bg-white/30 text-gray-700"
                     }`}
                   >
                     {statusConfig[request.Status]?.icon}{" "}
@@ -539,7 +563,7 @@ export default function UserRequestsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium text-gray-800">
                     {getPlanIcon(request.plan)} {getPlanLabel(request.plan)}
                   </span>
 
@@ -556,7 +580,7 @@ export default function UserRequestsPage() {
                   تاریخ: {formatDate(request.CreatedAt)}
                 </div>
                 {shouldRequireSeniorTech(request) && (
-                  <div className="text-sm font-medium text-red-700 mb-3">
+                  <div className="text-sm font-medium text-white bg-red-700 p-2 rounded-2xl mb-3">
                     نیازمند تکنسین ارشد
                   </div>
                 )}
@@ -564,7 +588,7 @@ export default function UserRequestsPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleView(request)}
-                    className="flex-1 text-indigo-600 border border-indigo-200 py-2 rounded-lg text-sm hover:bg-indigo-50"
+                    className="flex-1 text-indigo-600 border border-indigo-200/50 py-2 rounded-lg text-sm hover:bg-indigo-50/50 transition"
                   >
                     مشاهده
                   </button>
@@ -573,7 +597,7 @@ export default function UserRequestsPage() {
                     request.Status === "inProgress") && (
                     <button
                       onClick={() => handleCancel(request)}
-                      className="flex-1 text-red-600 border border-red-200 py-2 rounded-lg text-sm hover:bg-red-50"
+                      className="flex-1 text-red-600 border border-red-200/50 py-2 rounded-lg text-sm hover:bg-red-50/50 transition"
                     >
                       لغو
                     </button>
@@ -591,7 +615,7 @@ export default function UserRequestsPage() {
 
               <button
                 onClick={handleResetFilters}
-                className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
+                className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50/50 rounded-lg hover:bg-indigo-100/50 transition"
               >
                 حذف فیلترها
               </button>
@@ -606,17 +630,22 @@ export default function UserRequestsPage() {
 
       {selectedRequest && !showCancelModal && !showFinishModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">مشاهده درخواست</h2>
+            <div className="border-b border-gray-200/50 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-gray-800">
+                مشاهده درخواست
+              </h2>
 
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+              <button
+                onClick={closeModal}
+                className="text-gray-400 text-2xl hover:text-gray-600 transition"
+              >
                 &times;
               </button>
             </div>
@@ -626,7 +655,9 @@ export default function UserRequestsPage() {
                 <div>
                   <label className="text-sm text-gray-500">شناسه</label>
 
-                  <p className="font-medium">#{selectedRequest.ID}</p>
+                  <p className="font-medium text-gray-800">
+                    #{selectedRequest.ID}
+                  </p>
                 </div>
 
                 <div>
@@ -636,7 +667,7 @@ export default function UserRequestsPage() {
                     <span
                       className={`px-2 py-0.5 text-xs rounded-full ${
                         statusConfig[selectedRequest.Status]?.color ||
-                        "bg-gray-100 text-gray-700"
+                        "bg-white/30 text-gray-700"
                       }`}
                     >
                       {statusConfig[selectedRequest.Status]?.icon}{" "}
@@ -649,7 +680,7 @@ export default function UserRequestsPage() {
                 <div>
                   <label className="text-sm text-gray-500">طرح</label>
 
-                  <p>
+                  <p className="text-gray-800">
                     {getPlanIcon(selectedRequest.plan)}{" "}
                     {getPlanLabel(selectedRequest.plan)}
                   </p>
@@ -658,11 +689,13 @@ export default function UserRequestsPage() {
                 <div>
                   <label className="text-sm text-gray-500">دسته‌بندی</label>
 
-                  <p>{selectedRequest.Category?.name || "—"}</p>
+                  <p className="text-gray-800">
+                    {selectedRequest.Category?.name || "—"}
+                  </p>
                 </div>
 
                 {shouldRequireSeniorTech(selectedRequest) && (
-                  <div className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                  <div className="col-span-2 rounded-lg bg-red-50/80 backdrop-blur-sm border border-red-200/50 px-3 py-2 text-sm font-medium text-red-700">
                     این درخواست به بررسی تکنسین ارشد نیاز دارد.
                   </div>
                 )}
@@ -670,32 +703,58 @@ export default function UserRequestsPage() {
                 <div className="col-span-2">
                   <label className="text-sm text-gray-500">تاریخ ایجاد</label>
 
-                  <p>{formatDate(selectedRequest.CreatedAt)}</p>
+                  <p className="text-gray-800">
+                    {formatDate(selectedRequest.CreatedAt)}
+                  </p>
                 </div>
+
+                {selectedRequest.durationMinutes &&
+                  selectedRequest.durationMinutes > 0 && (
+                    <div className="col-span-2 rounded-lg bg-blue-500/10 backdrop-blur-sm border border-blue-400/30 px-3 py-2">
+                      <label className="text-sm text-blue-700/70">
+                        مدت زمان اعلام‌شده توسط متخصص
+                      </label>
+                      <p className="text-blue-900 font-bold mt-1">
+                        {selectedRequest.durationMinutes} دقیقه
+                      </p>
+                    </div>
+                  )}
+
+                {selectedRequest.endRejectionReason &&
+                  (selectedRequest.retries ?? 0) > 0 && (
+                    <div className="col-span-2 rounded-lg bg-orange-500/10 backdrop-blur-sm border border-orange-400/30 px-3 py-2">
+                      <label className="text-sm text-orange-700/70">
+                        دلیل رد قبلی
+                      </label>
+                      <p className="text-orange-900 font-medium mt-1">
+                        {selectedRequest.endRejectionReason}
+                      </p>
+                    </div>
+                  )}
 
                 <div className="col-span-2">
                   <label className="text-sm text-gray-500">شرح درخواست</label>
 
-                  <p className="bg-gray-50 p-2 rounded">
+                  <p className="bg-white/50 backdrop-blur-sm p-2 rounded border border-gray-200/50 text-gray-800">
                     {selectedRequest.description || "—"}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+            <div className="bg-white/30 backdrop-blur-sm border-t border-gray-200/50 px-6 py-4 flex justify-end">
               {selectedRequest.Status === "waitingApproval" && (
                 <div className="ml-auto flex gap-2">
                   <button
                     onClick={() => handleFinish(selectedRequest)}
                     disabled={(selectedRequest.retries ?? 0) >= 3}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                    className="px-4 py-2 bg-red-500/20 text-white border border-red-300/50 rounded-lg  transition"
                   >
                     رد پایان
                   </button>
                   <button
                     onClick={() => submitFinish(true)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                    className="px-4 py-2 bg-green-500/20 text-white border border-green-300/50 rounded-lg hover:bg-green-500/30 transition"
                   >
                     تأیید پایان
                   </button>
@@ -703,7 +762,7 @@ export default function UserRequestsPage() {
               )}
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/50 hover:bg-white/80 text-gray-700 rounded-lg transition border border-gray-300/50"
               >
                 بستن
               </button>
@@ -713,23 +772,32 @@ export default function UserRequestsPage() {
       )}
 
       {showFinishModal && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold mb-3">رد پایان درخواست</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">
+              رد پایان درخواست
+            </h3>
             <p className="text-sm text-gray-600 mb-3">
-              رد اول و دوم، درخواست را دوباره به وضعیت در حال انجام برمی‌گرداند. رد سوم نیاز به تکنسین ارشد دارد.
+              رد اول و دوم، درخواست را دوباره به وضعیت در حال انجام برمی‌گرداند.
+              رد سوم نیاز به تکنسین ارشد دارد.
             </p>
             <textarea
               value={rejectionReason}
               onChange={(event) => setRejectionReason(event.target.value)}
               placeholder="دلیل رد پایان را وارد کنید"
-              className="w-full min-h-24 border rounded-lg p-3"
+              className="w-full min-h-24 border border-gray-300/50 rounded-lg bg-white/50 backdrop-blur-sm text-gray-800 placeholder-gray-500 p-3"
             />
             <div className="flex gap-3 justify-end mt-4">
-              <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded-lg">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-white/50 hover:bg-white/80 text-gray-700 rounded-lg transition border border-gray-300/50"
+              >
                 انصراف
               </button>
-              <button onClick={() => submitFinish(false)} className="px-4 py-2 bg-red-600 text-white rounded-lg">
+              <button
+                onClick={() => submitFinish(false)}
+                className="px-4 py-2 bg-red-500/20 text-white border border-red-300/50 rounded-lg hover:bg-red-500/30 transition"
+              >
                 ثبت رد پایان
               </button>
             </div>
@@ -743,16 +811,16 @@ export default function UserRequestsPage() {
 
       {showCancelModal && selectedRequest && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-red-100/80 rounded-full flex items-center justify-center">
                   <svg
                     className="w-8 h-8 text-red-600"
                     fill="none"
@@ -769,7 +837,7 @@ export default function UserRequestsPage() {
                 </div>
               </div>
 
-              <h3 className="text-lg font-bold text-center mb-2">
+              <h3 className="text-lg font-bold text-gray-800 text-center mb-2">
                 لغو درخواست
               </h3>
 
@@ -784,14 +852,14 @@ export default function UserRequestsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                  className="flex-1 px-4 py-2 bg-white/50 hover:bg-white/80 text-gray-700 rounded-lg transition border border-gray-300/50"
                 >
                   انصراف
                 </button>
 
                 <button
                   onClick={confirmCancel}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-red-500/20 text-red-700 border border-red-300/50 rounded-lg hover:bg-red-500/30 transition"
                 >
                   لغو درخواست
                 </button>

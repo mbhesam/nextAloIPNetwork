@@ -30,8 +30,6 @@ interface Specialist {
   shifts?: Shift[];
 }
 
-
-
 const shiftTypeLabels: { [key: string]: string } = {
   dawn: "سحر (۰-۶)",
   morning: "صبح (۶-۱۲)",
@@ -40,10 +38,10 @@ const shiftTypeLabels: { [key: string]: string } = {
 };
 
 const shiftTypeColors: { [key: string]: string } = {
-  dawn: "bg-yellow-100 text-yellow-800",
-  morning: "bg-blue-100 text-blue-800",
-  evening: "bg-orange-100 text-orange-800",
-  night: "bg-purple-100 text-purple-800",
+  dawn: "bg-yellow-500/20 text-yellow-200",
+  morning: "bg-blue-500/20 text-blue-200",
+  evening: "bg-orange-500/20 text-orange-200",
+  night: "bg-purple-500/20 text-purple-200",
 };
 
 const shiftTypeIcons: { [key: string]: string } = {
@@ -90,7 +88,6 @@ export default function SpecialistShiftsPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [filteredShifts, setFilteredShifts] = useState<Shift[]>([]);
 
-  // دریافت اطلاعات متخصص فعلی
   const fetchCurrentSpecialist = async () => {
     const token = getAccessToken();
     if (!token) return null;
@@ -124,13 +121,11 @@ export default function SpecialistShiftsPage() {
     return null;
   };
 
-  // دریافت شیفت‌ها از API
   const fetchShifts = async () => {
     const token = getAccessToken();
     if (!token) return;
 
     try {
-      // ابتدا تلاش برای دریافت شیفت‌ها از endpoint مخصوص
       let response = await fetch(`${API_BASE_URL}/v1/specialists/shifts`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -146,22 +141,19 @@ export default function SpecialistShiftsPage() {
           ? data
           : data.data || data.shifts || [];
       } else {
-        // اگر endpoint شیفت جداگانه نداشت، از اطلاعات متخصص استفاده می‌کنیم
         const specialist = await fetchCurrentSpecialist();
         if (specialist && specialist.shifts) {
           shiftsData = specialist.shifts;
         }
       }
 
-      // فیلتر کردن شیفت‌های مربوط به متخصص فعلی
       const myShifts = shiftsData.filter((shift) => {
         if (shift.specialists && shift.specialists.length > 0) {
           return shift.specialists.some((s) => s.ID === currentSpecialist?.ID);
         }
-        return true; // اگر اطلاعات متخصص در شیفت نبود، همه را نشان بده
+        return true;
       });
 
-      // مرتب‌سازی بر اساس تاریخ (جدیدترین اول)
       const sorted = [...myShifts].sort(
         (a, b) =>
           new Date(b.shiftDate).getTime() - new Date(a.shiftDate).getTime(),
@@ -182,7 +174,6 @@ export default function SpecialistShiftsPage() {
       await fetchCurrentSpecialist();
       await fetchShifts();
 
-      // تنظیم تاریخ فعلی به امروز
       const today = moment();
       setCurrentPersianYear(parseInt(today.format("jYYYY")));
       setCurrentPersianMonth(parseInt(today.format("jMM")));
@@ -271,7 +262,6 @@ export default function SpecialistShiftsPage() {
   const getFirstDayOfMonth = (year: number, month: number): number => {
     const firstDay = moment(`${year}/${month}/01`, "jYYYY/jMM/DD");
     let dayOfWeek = firstDay.day();
-    // در moment با locale ایران، 0=شنبه است
     return dayOfWeek;
   };
 
@@ -317,25 +307,34 @@ export default function SpecialistShiftsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6 mt-30">
+    <div className="h-screen flex flex-col  p-4 md:p-6 relative overflow-hidden mt-30">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="flex-shrink-0 mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white/90">
             📅 شیفت‌های من
           </h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className="text-white/50 text-sm mt-1">
             مشاهده و مدیریت شیفت‌های کاری
           </p>
           {currentSpecialist?.user && (
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-white/40 mt-2">
               {currentSpecialist.user.name} {currentSpecialist.user.lastName}{" "}
               عزیز، خوش آمدید
             </p>
@@ -343,38 +342,32 @@ export default function SpecialistShiftsPage() {
         </div>
 
         {/* Calendar Section */}
-        <div className="flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex-shrink-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg shadow-blue-500/5 overflow-hidden mb-6">
+          <div className="p-4 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex gap-2">
               <button
                 onClick={prevMonth}
-                className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white/80 rounded-lg hover:bg-white/20 transition border border-white/10"
               >
                 ◀ قبلی
               </button>
               <button
                 onClick={goToToday}
-                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                className="px-4 py-2 bg-blue-500/20 text-white rounded-lg hover:bg-blue-500/30 transition border border-blue-400/20"
               >
                 امروز
               </button>
               <button
                 onClick={nextMonth}
-                className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white/80 rounded-lg hover:bg-white/20 transition border border-white/10"
               >
                 بعدی ▶
               </button>
             </div>
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-white/90">
               {monthNames[currentPersianMonth - 1]}{" "}
               {toPersianNumber(currentPersianYear)}
             </h2>
-            <button
-              onClick={refreshData}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2"
-            >
-              🔄 به‌روزرسانی
-            </button>
           </div>
 
           {/* Calendar Grid */}
@@ -383,7 +376,7 @@ export default function SpecialistShiftsPage() {
               {weekDays.map((day) => (
                 <div
                   key={day}
-                  className="text-center py-3 text-sm font-semibold text-gray-600 bg-gray-50 rounded-lg"
+                  className="text-center py-3 text-sm font-semibold text-white/50 bg-white/5 backdrop-blur-sm rounded-lg"
                 >
                   {day}
                 </div>
@@ -392,7 +385,7 @@ export default function SpecialistShiftsPage() {
               {emptyDays.map((_, index) => (
                 <div
                   key={`empty-${index}`}
-                  className="border rounded-lg min-h-[120px] p-2 bg-gray-50"
+                  className="border border-white/10 rounded-lg min-h-[120px] p-2 bg-white/5 backdrop-blur-sm"
                 ></div>
               ))}
 
@@ -422,19 +415,19 @@ export default function SpecialistShiftsPage() {
                     }
                     className={`border rounded-lg min-h-[120px] p-2 transition-all cursor-pointer hover:shadow-md ${
                       isTodayDate
-                        ? "bg-indigo-50 border-indigo-300 ring-2 ring-indigo-200"
+                        ? "bg-blue-500/20 border-blue-400/30 ring-2 ring-blue-400/20"
                         : isSelected
-                          ? "bg-green-50 border-green-300 ring-2 ring-green-200"
-                          : "bg-white hover:bg-gray-50"
+                          ? "bg-green-500/20 border-green-400/30 ring-2 ring-green-400/20"
+                          : "bg-white/5 backdrop-blur-sm hover:bg-white/10 border-white/10"
                     }`}
                   >
                     <div
                       className={`text-sm font-bold mb-2 ${
                         isTodayDate
-                          ? "text-indigo-700"
+                          ? "text-blue-300"
                           : isSelected
-                            ? "text-green-700"
-                            : "text-gray-700"
+                            ? "text-green-300"
+                            : "text-white/70"
                       }`}
                     >
                       {toPersianNumber(day)}
@@ -443,7 +436,7 @@ export default function SpecialistShiftsPage() {
                       {dayShifts.map((shift) => (
                         <div
                           key={shift.id}
-                          className={`text-xs p-1.5 rounded-lg ${shiftTypeColors[shift.shiftTime]} flex items-center justify-between`}
+                          className={`text-xs p-1.5 rounded-lg ${shiftTypeColors[shift.shiftTime]} flex items-center justify-between backdrop-blur-sm`}
                         >
                           <span className="truncate">
                             {shiftTypeIcons[shift.shiftTime]}{" "}
@@ -461,13 +454,13 @@ export default function SpecialistShiftsPage() {
 
         {/* Shifts Details Table */}
         <div className="flex-1 min-h-0 overflow-auto">
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center flex-shrink-0">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg shadow-blue-500/5 overflow-hidden h-full flex flex-col">
+            <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex justify-between items-center flex-shrink-0">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">
+                <h2 className="text-lg font-bold text-white/90">
                   📋 جزئیات شیفت
                 </h2>
-                <p className="text-gray-500 text-sm">
+                <p className="text-white/40 text-sm">
                   {selectedDate
                     ? `شیفت‌های روز ${selectedDate}`
                     : `لیست کامل شیفت‌های ثبت شده (${toPersianNumber(filteredShifts.length)} شیفت)`}
@@ -476,7 +469,7 @@ export default function SpecialistShiftsPage() {
               {selectedDate && (
                 <button
                   onClick={showAllShifts}
-                  className="px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                  className="px-3 py-1 text-sm text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 rounded-lg transition"
                 >
                   نمایش همه
                 </button>
@@ -486,33 +479,33 @@ export default function SpecialistShiftsPage() {
             <div className="flex-1 overflow-auto">
               {/* Desktop Table */}
               <div className="hidden md:block">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
+                <table className="min-w-full divide-y divide-white/10">
+                  <thead className="bg-white/5 sticky top-0">
                     <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/50 uppercase tracking-wider">
                         شناسه
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/50 uppercase tracking-wider">
                         تاریخ
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/50 uppercase tracking-wider">
                         زمان شیفت
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/50 uppercase tracking-wider">
                         متخصص
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-white/5">
                     {filteredShifts.map((shift) => (
                       <tr
                         key={shift.id}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-white/5 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                           #{shift.id}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                           {formatDate(shift.shiftDate)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -523,7 +516,7 @@ export default function SpecialistShiftsPage() {
                             {formatShiftTime(shift.shiftTime)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70 font-medium">
                           {getSpecialistName(shift)}
                         </td>
                       </tr>
@@ -534,11 +527,11 @@ export default function SpecialistShiftsPage() {
 
               {/* Mobile Cards */}
               <div className="md:hidden">
-                <div className="divide-y divide-gray-200">
+                <div className="divide-y divide-white/10">
                   {filteredShifts.map((shift) => (
-                    <div key={shift.id} className="p-4 hover:bg-gray-50">
+                    <div key={shift.id} className="p-4 hover:bg-white/5">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-white/40">
                           #{shift.id}
                         </span>
                         <span
@@ -547,10 +540,10 @@ export default function SpecialistShiftsPage() {
                           {formatShiftTime(shift.shiftTime)}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-600 mb-1">
+                      <div className="text-sm text-white/60 mb-1">
                         تاریخ: {formatDate(shift.shiftDate)}
                       </div>
-                      <div className="text-sm font-medium text-gray-800">
+                      <div className="text-sm font-medium text-white/80">
                         متخصص: {getSpecialistName(shift)}
                       </div>
                     </div>
@@ -560,7 +553,7 @@ export default function SpecialistShiftsPage() {
 
               {filteredShifts.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-gray-500">
+                  <p className="text-white/50">
                     {selectedDate
                       ? "هیچ شیفتی برای این تاریخ یافت نشد"
                       : "هیچ شیفتی ثبت نشده است"}
@@ -568,7 +561,7 @@ export default function SpecialistShiftsPage() {
                   {selectedDate && (
                     <button
                       onClick={showAllShifts}
-                      className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
+                      className="mt-4 px-4 py-2 text-blue-300 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition"
                     >
                       نمایش همه شیفت‌ها
                     </button>

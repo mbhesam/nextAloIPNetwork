@@ -22,8 +22,6 @@ interface BudgetInfo {
   };
 }
 
-
-
 export default function UserWalletPage() {
   const { user, getAccessToken } = useAuth();
   const [walletBalance, setWalletBalance] = useState(0);
@@ -69,11 +67,11 @@ export default function UserWalletPage() {
   };
 
   const getStatusColor = (status: string) => {
-    if (status === "internal_charge") return "bg-blue-100 text-blue-800";
-    if (status === "success") return "bg-green-100 text-green-800";
-    if (status === "pending") return "bg-yellow-100 text-yellow-800";
-    if (status === "failed") return "bg-red-100 text-red-800";
-    return "bg-gray-100 text-gray-800";
+    if (status === "internal_charge") return "bg-blue-500/20 text-blue-200";
+    if (status === "success") return "bg-green-500/20 text-green-200";
+    if (status === "pending") return "bg-yellow-500/20 text-yellow-200";
+    if (status === "failed") return "bg-red-500/20 text-red-200";
+    return "bg-white/10 text-white/60";
   };
 
   const getStatusIcon = (status: string) => {
@@ -220,28 +218,37 @@ export default function UserWalletPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-indigo-800 to-blue-950">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-30">
+    <div className="min-h-screen from-blue-900 via-indigo-800 to-blue-950 p-4 md:p-6 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-30">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white/90">
             💰 کیف پول و تراکنش‌ها
           </h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className="text-white/50 text-sm mt-1">
             شارژ کنید و دقیقاً ببینید چند ساعت دریافت می‌کنید
           </p>
         </div>
 
         {/* Wallet Balance Card */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
+          <div className="bg-gradient-to-r from-indigo-600/80 to-purple-600/80 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-xl shadow-indigo-500/10">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">💰</span>
               <span className="text-sm opacity-90">موجودی فعلی</span>
@@ -252,83 +259,83 @@ export default function UserWalletPage() {
             </p>
             <button
               onClick={() => setShowChargeModal(true)}
-              className="mt-4 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-colors"
+              className="mt-4 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-colors border border-white/10"
             >
               + همین حالا شارژ کن
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 p-6">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">💳</span>
-              <span className="text-sm text-gray-500">مجموع شارژ شده</span>
+              <span className="text-sm text-white/60">مجموع شارژ شده</span>
             </div>
-            <p className="text-3xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-white">
               {formatAmount(totalCharged)}{" "}
-              <span className="text-lg font-normal text-gray-500">تومان</span>
+              <span className="text-lg font-normal text-white/40">تومان</span>
             </p>
-            <p className="text-xs text-gray-400 mt-2">از ابتدا تاکنون</p>
+            <p className="text-xs text-white/30 mt-2">از ابتدا تاکنون</p>
           </div>
         </div>
 
         {/* معادل ساعت از بودجه موجود */}
         {budgetInfo?.timeResult && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 p-6 mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xl">⏱️</span>
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-white/90">
                 معادل ساعت پشتیبانی از بودجه موجود
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="bg-indigo-50 rounded-xl p-3 text-center">
-                <div className="text-2xl font-bold text-indigo-600">
+              <div className="bg-indigo-500/20 backdrop-blur-sm rounded-xl p-3 text-center border border-indigo-400/20">
+                <div className="text-2xl font-bold text-indigo-300">
                   {formatTimeResult(
                     budgetInfo.timeResult.instant.hour,
                     budgetInfo.timeResult.instant.minute,
                   )}
                 </div>
-                <div className="text-sm text-gray-600">⚡ فوری</div>
+                <div className="text-sm text-white/60">⚡ فوری</div>
               </div>
-              <div className="bg-green-50 rounded-xl p-3 text-center">
-                <div className="text-2xl font-bold text-green-600">
+              <div className="bg-green-500/20 backdrop-blur-sm rounded-xl p-3 text-center border border-green-400/20">
+                <div className="text-2xl font-bold text-green-300">
                   {formatTimeResult(
                     budgetInfo.timeResult.shortStay.hour,
                     budgetInfo.timeResult.shortStay.minute,
                   )}
                 </div>
-                <div className="text-sm text-gray-600">🏨 کوتاه‌مدت</div>
+                <div className="text-sm text-white/60">🏨 کوتاه‌مدت</div>
               </div>
-              <div className="bg-blue-50 rounded-xl p-3 text-center">
-                <div className="text-2xl font-bold text-blue-600">
+              <div className="bg-blue-500/20 backdrop-blur-sm rounded-xl p-3 text-center border border-blue-400/20">
+                <div className="text-2xl font-bold text-blue-300">
                   {formatTimeResult(
                     budgetInfo.timeResult.Schedulable.hour,
                     budgetInfo.timeResult.Schedulable.minute,
                   )}
                 </div>
-                <div className="text-sm text-gray-600">📅 زمان‌بندی شده</div>
+                <div className="text-sm text-white/60">📅 زمان‌بندی شده</div>
               </div>
             </div>
           </div>
         )}
 
         {/* Transactions Table */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-800">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/10 bg-white/5">
+            <h2 className="text-lg font-bold text-white/90">
               📜 تاریخچه تراکنش‌ها
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-white/40 text-sm">
               لیست تمام تراکنش‌های مالی شما
             </p>
           </div>
 
           {payments.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">هیچ تراکنشی یافت نشد</p>
+              <p className="text-white/50">هیچ تراکنشی یافت نشد</p>
               <button
                 onClick={() => setShowChargeModal(true)}
-                className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
+                className="mt-4 px-4 py-2 text-blue-300 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition border border-blue-400/20"
               >
                 اولین شارژ را انجام دهید
               </button>
@@ -337,40 +344,40 @@ export default function UserWalletPage() {
             <>
               {/* Desktop Table */}
               <div className="hidden md:block overflow-auto max-h-[70vh]">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
+                <table className="min-w-full divide-y divide-white/10">
+                  <thead className="bg-white/5 sticky top-0">
                     <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                         تاریخ و زمان
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                         تراکنش
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                         مرجع
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                         وضعیت
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white/60 uppercase tracking-wider">
                         مبلغ
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-white/5">
                     {payments.map((payment) => (
                       <tr
                         key={payment.ID}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-white/5 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                           {formatDate(payment.CreatedAt)} -{" "}
                           {formatTime(payment.CreatedAt)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                           تراکنش #{payment.ID}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/50 font-mono">
                           {payment.GatewayRef || "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -381,7 +388,7 @@ export default function UserWalletPage() {
                             {getStatusLabel(payment.Status)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-300">
                           +{formatAmount(payment.Amount)} تومان
                         </td>
                       </tr>
@@ -391,11 +398,11 @@ export default function UserWalletPage() {
               </div>
 
               {/* Mobile Cards */}
-              <div className="md:hidden divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
+              <div className="md:hidden divide-y divide-white/10 max-h-[70vh] overflow-y-auto">
                 {payments.map((payment) => (
-                  <div key={payment.ID} className="p-4 hover:bg-gray-50">
+                  <div key={payment.ID} className="p-4 hover:bg-white/5">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-white/40">
                         {formatDate(payment.CreatedAt)} -{" "}
                         {formatTime(payment.CreatedAt)}
                       </span>
@@ -406,13 +413,13 @@ export default function UserWalletPage() {
                         {getStatusLabel(payment.Status)}
                       </span>
                     </div>
-                    <div className="font-medium text-sm mb-1">
+                    <div className="font-medium text-sm text-white/80 mb-1">
                       تراکنش #{payment.ID}
                     </div>
-                    <div className="text-xs text-gray-500 font-mono mb-2">
+                    <div className="text-xs text-white/40 font-mono mb-2">
                       مرجع: {payment.GatewayRef || "—"}
                     </div>
-                    <div className="text-base font-bold text-green-600">
+                    <div className="text-base font-bold text-green-300">
                       +{formatAmount(payment.Amount)} تومان
                     </div>
                   </div>
@@ -426,18 +433,18 @@ export default function UserWalletPage() {
       {/* Charge Modal */}
       {showChargeModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={() => setShowChargeModal(false)}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">شارژ کیف پول</h2>
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white/90">شارژ کیف پول</h2>
               <button
                 onClick={() => setShowChargeModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="text-white/40 hover:text-white/80 text-2xl transition"
               >
                 &times;
               </button>
@@ -446,7 +453,7 @@ export default function UserWalletPage() {
             <div className="p-6 space-y-6">
               {/* Quick Amounts */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-white/80 mb-3">
                   مبلغ مورد نظر (تومان)
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -459,8 +466,8 @@ export default function UserWalletPage() {
                       }}
                       className={`py-2 px-3 rounded-lg border transition-all ${
                         selectedAmount === amount
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white text-gray-700 border-gray-300 hover:border-indigo-400"
+                          ? "bg-blue-500/30 text-white border-blue-400"
+                          : "bg-white/10 text-white/70 border-white/20 hover:border-white/40 hover:bg-white/20"
                       }`}
                     >
                       {formatAmount(amount)}
@@ -471,7 +478,7 @@ export default function UserWalletPage() {
 
               {/* Custom Amount */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/80 mb-2">
                   مبلغ دلخواه
                 </label>
                 <input
@@ -482,16 +489,16 @@ export default function UserWalletPage() {
                     setSelectedAmount(null);
                   }}
                   placeholder="مبلغ را وارد کنید"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
                 />
               </div>
 
               {/* Total Amount */}
               {selectedAmountNumber > 0 && (
-                <div className="border-t pt-4">
+                <div className="border-t border-white/10 pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">مبلغ قابل پرداخت:</span>
-                    <span className="text-xl font-bold text-indigo-600">
+                    <span className="text-white/60">مبلغ قابل پرداخت:</span>
+                    <span className="text-xl font-bold text-blue-300">
                       {formatAmount(selectedAmountNumber)} تومان
                     </span>
                   </div>
@@ -499,20 +506,20 @@ export default function UserWalletPage() {
               )}
             </div>
 
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="sticky bottom-0 bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={() => setShowChargeModal(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition border border-white/10"
               >
                 انصراف
               </button>
               <button
                 onClick={confirmCharge}
                 disabled={selectedAmountNumber === 0 || charging}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition ${
                   selectedAmountNumber > 0 && !charging
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "bg-white/10 text-white/40 cursor-not-allowed"
                 }`}
               >
                 {charging ? "در حال پردازش..." : "تایید و شارژ"}

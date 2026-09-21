@@ -40,13 +40,11 @@ export default function AdminCostSettingsPage() {
     null,
   );
 
-  // Form states
   const [formData, setFormData] = useState({
     plan: "instant",
     costPerHour: "",
   });
 
-  // دریافت لیست تنظیمات هزینه
   const loadCostSettings = async () => {
     const token = getAccessToken();
     if (!token) {
@@ -64,7 +62,6 @@ export default function AdminCostSettingsPage() {
     }
   };
 
-  // ایجاد تنظیمات هزینه جدید
   const createSetting = async (settingData: any) => {
     const token = getAccessToken();
     if (!token) return false;
@@ -91,7 +88,6 @@ export default function AdminCostSettingsPage() {
     }
   };
 
-  // ویرایش تنظیمات هزینه
   const updateSetting = async (id: number, settingData: any) => {
     const token = getAccessToken();
     if (!token) return false;
@@ -118,7 +114,6 @@ export default function AdminCostSettingsPage() {
     }
   };
 
-  // حذف تنظیمات هزینه
   const removeSetting = async (id: number) => {
     const token = getAccessToken();
     if (!token) return false;
@@ -255,29 +250,38 @@ export default function AdminCostSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6">
-        <div className="bg-white rounded-xl shadow-lg flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
+    <div className="min-h-screen  p-4 md:p-6 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 p-4 sm:p-6">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
           {/* Header */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl font-bold text-white/90">
                 💰 تنظیمات هزینه
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-white/50 text-sm mt-1">
                 مدیریت هزینه هر ساعت برای پلن‌های مختلف
               </p>
             </div>
             <button
               onClick={handleCreate}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -297,10 +301,10 @@ export default function AdminCostSettingsPage() {
           </div>
 
           {/* Search Filter */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+          <div className="p-4 sm:p-6 border-b border-white/10 bg-white/5 shrink-0">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   جستجو
                 </label>
                 <input
@@ -308,19 +312,19 @@ export default function AdminCostSettingsPage() {
                   placeholder="جستجو بر اساس ID یا نام پلن..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 text-white/70 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   حذف فیلترها
                 </button>
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-white/40">
               {toPersianNumber(filteredSettings.length)} مورد یافت شد
             </div>
           </div>
@@ -328,49 +332,49 @@ export default function AdminCostSettingsPage() {
           {/* Scrollable Table */}
           <div className="flex-1 min-h-0 overflow-auto">
             <div className="hidden md:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-white/5 sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       پلن
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       هزینه هر ساعت
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       عملیات
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/5">
                   {filteredSettings.map((setting) => (
                     <tr
                       key={setting.ID}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/5 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                         {setting.ID}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white/90">
                         {planLabels[setting.Plan] || setting.Plan}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">
                         {formatAmount(setting.CostPerHour)} تومان
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEdit(setting)}
-                            className="text-amber-600 hover:text-amber-900 px-3 py-1 rounded-md hover:bg-amber-50"
+                            className="text-green-300 hover:text-green-200 px-3 py-1 rounded-md transition"
                           >
                             ویرایش
                           </button>
                           <button
                             onClick={() => handleDeleteClick(setting)}
-                            className="text-red-600 hover:text-red-900 px-3 py-1 rounded-md hover:bg-red-50"
+                            className="text-red-300 hover:text-red-200 px-3 py-1 rounded-md transition"
                           >
                             حذف
                           </button>
@@ -385,28 +389,31 @@ export default function AdminCostSettingsPage() {
             {/* Mobile Cards */}
             <div className="md:hidden">
               {filteredSettings.map((setting) => (
-                <div key={setting.ID} className="p-4 border-b hover:bg-gray-50">
+                <div
+                  key={setting.ID}
+                  className="p-4 border-b border-white/5 hover:bg-white/5"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-white/40">
                       ID: {setting.ID}
                     </span>
                   </div>
-                  <div className="font-bold text-base mb-1">
+                  <div className="font-bold text-base text-white/90 mb-1">
                     {planLabels[setting.Plan] || setting.Plan}
                   </div>
-                  <div className="text-sm text-green-600 font-semibold mb-3">
+                  <div className="text-sm text-green-300 font-semibold mb-3">
                     {formatAmount(setting.CostPerHour)} تومان
                   </div>
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     <button
                       onClick={() => handleEdit(setting)}
-                      className="flex-1 text-amber-600 py-2 text-sm"
+                      className="flex-1 text-green-300 py-2 text-sm  rounded transition"
                     >
                       ویرایش
                     </button>
                     <button
                       onClick={() => handleDeleteClick(setting)}
-                      className="flex-1 text-red-600 py-2 text-sm"
+                      className="flex-1 text-red-300 py-2 text-sm rounded transition"
                     >
                       حذف
                     </button>
@@ -417,10 +424,10 @@ export default function AdminCostSettingsPage() {
 
             {filteredSettings.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500">نتیجه‌ای یافت نشد</p>
+                <p className="text-white/50">نتیجه‌ای یافت نشد</p>
                 <button
                   onClick={handleResetFilters}
-                  className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg"
+                  className="mt-4 px-4 py-2 text-blue-300 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition"
                 >
                   حذف فیلترها
                 </button>
@@ -433,22 +440,27 @@ export default function AdminCostSettingsPage() {
       {/* Create Modal */}
       {modalType === "create" && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">افزودن هزینه جدید</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                افزودن هزینه جدید
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   پلن *
                 </label>
                 <select
@@ -456,17 +468,32 @@ export default function AdminCostSettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, plan: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  style={{
+                    width: "100%",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    backdropFilter: "blur(8px)",
+                    color: "white",
+                    outline: "none",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
                 >
                   {planOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      style={{ backgroundColor: "#4a4a4a", color: "white" }}
+                    >
                       {option.label}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   هزینه هر ساعت (تومان) *
                 </label>
                 <input
@@ -476,28 +503,32 @@ export default function AdminCostSettingsPage() {
                     const rawValue = e.target.value;
                     const digitsOnly = normalizeDigits(rawValue);
                     const formattedValue =
-                      digitsOnly === "" ? "" : new Intl.NumberFormat("fa-IR").format(Number(digitsOnly));
+                      digitsOnly === ""
+                        ? ""
+                        : new Intl.NumberFormat("fa-IR").format(
+                            Number(digitsOnly),
+                          );
                     setFormData({ ...formData, costPerHour: formattedValue });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   placeholder="مثال: ۱,۰۰۰,۰۰۰"
                   autoFocus
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-red-300/80 mt-1">
                   فیلدهای ستاره دار (*) اجباری هستند
                 </p>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveNewSetting}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 افزودن
               </button>
@@ -509,22 +540,25 @@ export default function AdminCostSettingsPage() {
       {/* Edit Modal */}
       {modalType === "edit" && selectedSetting && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">ویرایش هزینه</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">ویرایش هزینه</h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   پلن
                 </label>
                 <select
@@ -532,17 +566,32 @@ export default function AdminCostSettingsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, plan: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  style={{
+                    width: "100%",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    backdropFilter: "blur(8px)",
+                    color: "white",
+                    outline: "none",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
                 >
                   {planOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      style={{ backgroundColor: "#4a4a4a", color: "white" }}
+                    >
                       {option.label}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   هزینه هر ساعت (تومان)
                 </label>
                 <input
@@ -552,25 +601,29 @@ export default function AdminCostSettingsPage() {
                     const rawValue = e.target.value;
                     const digitsOnly = normalizeDigits(rawValue);
                     const formattedValue =
-                      digitsOnly === "" ? "" : new Intl.NumberFormat("fa-IR").format(Number(digitsOnly));
+                      digitsOnly === ""
+                        ? ""
+                        : new Intl.NumberFormat("fa-IR").format(
+                            Number(digitsOnly),
+                          );
                     setFormData({ ...formData, costPerHour: formattedValue });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   placeholder="مثال: ۱,۰۰۰,۰۰۰"
                   autoFocus
                 />
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveEdit}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 ذخیره
               </button>
@@ -582,18 +635,18 @@ export default function AdminCostSettingsPage() {
       {/* Delete Modal */}
       {modalType === "delete" && selectedSetting && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center border border-red-400/30">
                   <svg
-                    className="w-8 h-8 text-red-600"
+                    className="w-8 h-8 text-red-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -607,25 +660,27 @@ export default function AdminCostSettingsPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-center mb-2">حذف هزینه</h3>
-              <p className="text-gray-600 text-center mb-6">
-                آیا از حذف هزینه پلن{planLabels[selectedSetting.Plan]} مطمئن
+              <h3 className="text-lg font-bold text-white/90 text-center mb-2">
+                حذف هزینه
+              </h3>
+              <p className="text-white/60 text-center mb-6">
+                آیا از حذف هزینه پلن {planLabels[selectedSetting.Plan]} مطمئن
                 هستید؟
                 <br />
-                <span className="text-sm text-red-500">
+                <span className="text-sm text-red-300">
                   این عمل قابل بازگشت نیست.
                 </span>
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
                 >
                   انصراف
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-red-500/30 hover:bg-red-500/40 text-red-200 border border-red-400/30 rounded-lg transition"
                 >
                   حذف
                 </button>

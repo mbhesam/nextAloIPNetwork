@@ -7,8 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "../lib/api";
 
-
-
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
@@ -49,12 +47,10 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // ذخیره در localStorage
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // فراخوانی login از AuthContext (همین کار رو انجام میده)
         login(data.access_token, data.refresh_token, {
           ID: data.user?.ID,
           name: data.user?.name,
@@ -167,8 +163,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4  to-blue-950 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
           <Image
             src="/aloip-network-logo.svg"
@@ -177,28 +182,27 @@ export default function LoginPage() {
             alt="لوگوی AloIP Network"
             className="mx-auto mb-4"
           />
-          <h1 className="text-3xl font-bold text-gray-800">AloIPNetwork</h1>
-          <p className="text-gray-500 mt-2">به حساب کاربری خود وارد شوید</p>
+          <p className="text-white/50 mt-2">به حساب کاربری خود وارد شوید</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="flex border-b border-gray-200">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="flex border-b border-white/10">
             <button
               onClick={() => setLoginMethod("password")}
-              className={`flex-1 py-4 text-center font-medium transition-colors ${
+              className={`flex-1 py-4 text-center font-medium transition-all ${
                 loginMethod === "password"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "text-white bg-white/10 border-b-2 border-blue-400"
+                  : "text-white/50 hover:text-white/80"
               }`}
             >
               رمز عبور
             </button>
             <button
               onClick={() => setLoginMethod("otp")}
-              className={`flex-1 py-4 text-center font-medium transition-colors ${
+              className={`flex-1 py-4 text-center font-medium transition-all ${
                 loginMethod === "otp"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "text-white bg-white/10 border-b-2 border-blue-400"
+                  : "text-white/50 hover:text-white/80"
               }`}
             >
               ورود با کد یکبارمصرف
@@ -212,11 +216,11 @@ export default function LoginPage() {
             className="p-6 space-y-5"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 شماره تلفن
               </label>
               <div className="relative">
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40">
                   📞
                 </span>
                 <input
@@ -224,7 +228,7 @@ export default function LoginPage() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="09121234567"
-                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  className="w-full px-4 py-3 pr-10 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                   dir="ltr"
                 />
               </div>
@@ -232,11 +236,11 @@ export default function LoginPage() {
 
             {loginMethod === "password" ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/80 mb-2">
                   رمز عبور
                 </label>
                 <div className="relative">
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40">
                     🔒
                   </span>
                   <input
@@ -244,13 +248,13 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="رمز عبور را وارد کنید"
-                    className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-4 py-3 pr-10 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                   />
                 </div>
                 <div className="flex justify-end mt-2">
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-indigo-600 hover:text-indigo-700"
+                    className="text-xs text-blue-300 hover:text-blue-200"
                   >
                     رمز عبور خود را فراموش کرده‌اید؟
                   </Link>
@@ -258,12 +262,12 @@ export default function LoginPage() {
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/80 mb-2">
                   کد یکبارمصرف
                 </label>
                 <div className="flex gap-3">
                   <div className="relative flex-1">
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/40">
                       ✉️
                     </span>
                     <input
@@ -271,7 +275,7 @@ export default function LoginPage() {
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
                       placeholder="کد ۶ رقمی را وارد کنید"
-                      className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      className="w-full px-4 py-3 pr-10 border border-white/20 rounded-xl bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                       dir="ltr"
                       maxLength={6}
                     />
@@ -280,32 +284,32 @@ export default function LoginPage() {
                     type="button"
                     onClick={handleSendOtp}
                     disabled={isLoading}
-                    className="px-4 py-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors whitespace-nowrap disabled:opacity-50"
+                    className="px-4 py-3 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-colors whitespace-nowrap disabled:opacity-50 backdrop-blur-sm"
                   >
                     ارسال کد
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-white/40 mt-2">
                   کد یکبارمصرف به شماره تلفن شما ارسال خواهد شد
                 </p>
               </div>
             )}
 
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">
+              <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 p-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                  className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-blue-400 focus:ring-offset-0"
                 />
-                <span className="text-sm text-gray-600">مرا به خاطر بسپار</span>
+                <span className="text-sm text-white/60">مرا به خاطر بسپار</span>
               </label>
             </div>
 
@@ -314,8 +318,8 @@ export default function LoginPage() {
               disabled={isLoading}
               className={`w-full py-3 rounded-xl font-medium text-white transition-all ${
                 isLoading
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl"
+                  ? "bg-blue-500/50 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/20 hover:shadow-xl"
               }`}
             >
               {isLoading ? (
@@ -329,12 +333,12 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="px-6 py-4 bg-white/5 backdrop-blur-sm border-t border-white/10 text-center">
+            <p className="text-sm text-white/60">
               حساب کاربری ندارید؟{" "}
               <Link
                 href="/register"
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-blue-300 hover:text-blue-200 font-medium"
               >
                 ثبت‌نام کنید
               </Link>
@@ -342,9 +346,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-white/30 mt-6">
           ورود شما به معنای پذیرش{" "}
-          <Link href="/terms" className="text-indigo-500 hover:underline">
+          <Link href="/terms" className="text-blue-300/60 hover:text-blue-300">
             قوانین و مقررات
           </Link>{" "}
           است

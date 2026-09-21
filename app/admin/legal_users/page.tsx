@@ -19,8 +19,6 @@ interface LegalUser {
   Active: boolean;
 }
 
-
-
 type ModalType = "view" | "edit" | "delete" | "create" | null;
 
 export default function AdminLegalUsersPage() {
@@ -31,10 +29,8 @@ export default function AdminLegalUsersPage() {
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<LegalUser | null>(null);
 
-  // Edit states
   const [editForm, setEditForm] = useState<Partial<LegalUser>>({});
 
-  // Create states
   const [newForm, setNewForm] = useState<Partial<LegalUser>>({
     UserID: 0,
     CompanyName: "",
@@ -296,7 +292,6 @@ export default function AdminLegalUsersPage() {
       if (!token) return;
 
       try {
-        // بررسی نوع کاربر
         const checkResponse = await fetch(
           `${API_BASE_URL}/v1/user/${editForm.UserID}`,
           {
@@ -316,7 +311,6 @@ export default function AdminLegalUsersPage() {
             return;
           }
 
-          // تغییر نوع کاربر
           const updateTypeResponse = await fetch(
             `${API_BASE_URL}/v1/user/${editForm.UserID}`,
             {
@@ -343,7 +337,6 @@ export default function AdminLegalUsersPage() {
           }
         }
 
-        // ذخیره اطلاعات حقوقی
         const success = await updateLegalUser(selectedUser.ID, {
           UserID: editForm.UserID,
           CompanyName: editForm.CompanyName,
@@ -388,7 +381,6 @@ export default function AdminLegalUsersPage() {
     if (!token) return;
 
     try {
-      // بررسی نوع کاربر
       const checkResponse = await fetch(
         `${API_BASE_URL}/v1/user/${newForm.UserID}`,
         {
@@ -408,7 +400,6 @@ export default function AdminLegalUsersPage() {
           return;
         }
 
-        // تغییر نوع کاربر
         const updateTypeResponse = await fetch(
           `${API_BASE_URL}/v1/user/${newForm.UserID}`,
           {
@@ -469,29 +460,38 @@ export default function AdminLegalUsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-100">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
-        <div className="bg-white rounded-xl shadow-lg flex flex-col flex-1 min-h-0 overflow-hidden mt-30">
+    <div className="min-h-screen  p-4 md:p-6 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 flex flex-col flex-1 min-h-0 overflow-hidden mt-30">
           {/* Header */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl font-bold text-white/90">
                 🏢 کاربران حقوقی
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-white/50 text-sm mt-1">
                 مدیریت و مشاهده اطلاعات کاربران حقوقی
               </p>
             </div>
             <button
               onClick={handleCreate}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -511,10 +511,10 @@ export default function AdminLegalUsersPage() {
           </div>
 
           {/* Search Filter */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+          <div className="p-4 sm:p-6 border-b border-white/10 bg-white/5 shrink-0">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   جستجو
                 </label>
                 <input
@@ -522,19 +522,19 @@ export default function AdminLegalUsersPage() {
                   placeholder="جستجو بر اساس ID، User ID، نام شرکت، شماره ثبت..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 text-white/70 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   حذف فیلترها
                 </button>
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-white/40">
               {filteredUsers.length} کاربر یافت شد
             </div>
           </div>
@@ -542,62 +542,64 @@ export default function AdminLegalUsersPage() {
           {/* Scrollable List */}
           <div className="flex-1 min-h-0">
             <div className="hidden md:block h-full overflow-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0 z-10">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-white/5 sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       ID
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       User ID
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       نام شرکت
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       شماره ثبت
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       تلفن شرکت
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-white/50">
                       عملیات
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white/5 divide-y divide-white/5">
                   {filteredUsers.map((user) => (
-                    <tr key={user.ID} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm">{user.ID || "—"}</td>
-                      <td className="px-4 py-3 text-sm">
+                    <tr key={user.ID} className="hover:bg-white/10 transition">
+                      <td className="px-4 py-3 text-sm text-white/80">
+                        {user.ID || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/80">
                         {user.UserID || "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium">
+                      <td className="px-4 py-3 text-sm font-medium text-white/90">
                         {user.CompanyName || "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm text-white/60">
                         {user.OfficialRegisterNumber || "—"}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm text-white/60">
                         {user.CompanyPhoneNumber || "—"}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(user)}
-                            className="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded"
+                            className="text-blue-300 hover:text-blue-200 px-2 py-1 rounded  transition"
                           >
                             مشاهده
                           </button>
                           <button
                             onClick={() => handleEdit(user)}
-                            className="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded"
+                            className="text-green-300 hover:text-green-200 px-2 py-1 rounded  transition"
                           >
                             ویرایش
                           </button>
                           <button
                             onClick={() => handleDeleteClick(user)}
-                            className="text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                            className="text-red-300 hover:text-red-200 px-2 py-1 rounded  transition"
                           >
                             حذف
                           </button>
@@ -612,37 +614,40 @@ export default function AdminLegalUsersPage() {
             {/* Mobile Cards */}
             <div className="md:hidden h-full overflow-auto">
               {filteredUsers.map((user) => (
-                <div key={user.ID} className="p-4 border-b hover:bg-gray-50">
+                <div
+                  key={user.ID}
+                  className="p-4 border-b border-white/5 hover:bg-white/5"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-white/40">
                       ID: {user.ID || "—"} | User ID: {user.UserID || "—"}
                     </span>
                   </div>
-                  <div className="font-bold text-base mb-2">
+                  <div className="font-bold text-base text-white/90 mb-2">
                     {user.CompanyName || "—"}
                   </div>
-                  <div className="text-sm text-gray-600 mb-1">
+                  <div className="text-sm text-white/60 mb-1">
                     شماره ثبت: {user.OfficialRegisterNumber || "—"}
                   </div>
-                  <div className="text-sm text-gray-600 mb-3">
+                  <div className="text-sm text-white/60 mb-3">
                     تلفن: {user.CompanyPhoneNumber || "—"}
                   </div>
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     <button
                       onClick={() => handleView(user)}
-                      className="flex-1 text-indigo-600 py-2 text-sm"
+                      className="flex-1 text-blue-300 py-2 text-sm hover:bg-blue-500/10 rounded transition"
                     >
                       مشاهده
                     </button>
                     <button
                       onClick={() => handleEdit(user)}
-                      className="flex-1 text-amber-600 py-2 text-sm"
+                      className="flex-1 text-amber-300 py-2 text-sm hover:bg-amber-500/10 rounded transition"
                     >
                       ویرایش
                     </button>
                     <button
                       onClick={() => handleDeleteClick(user)}
-                      className="flex-1 text-red-600 py-2 text-sm"
+                      className="flex-1 text-red-300 py-2 text-sm hover:bg-red-500/10 rounded transition"
                     >
                       حذف
                     </button>
@@ -653,7 +658,7 @@ export default function AdminLegalUsersPage() {
 
             {filteredUsers.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500">نتیجه‌ای یافت نشد</p>
+                <p className="text-white/50">نتیجه‌ای یافت نشد</p>
               </div>
             )}
           </div>
@@ -663,79 +668,100 @@ export default function AdminLegalUsersPage() {
       {/* View Modal */}
       {modalType === "view" && selectedUser && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">مشاهده کاربر حقوقی</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                مشاهده کاربر حقوقی
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-500">ID</label>
-                  <p>{selectedUser.ID || "—"}</p>
+                  <label className="text-sm text-white/50">ID</label>
+                  <p className="text-white/80">{selectedUser.ID || "—"}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">User ID</label>
-                  <p>{selectedUser.UserID || "—"}</p>
+                  <label className="text-sm text-white/50">User ID</label>
+                  <p className="text-white/80">{selectedUser.UserID || "—"}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">نام شرکت</label>
-                  <p>{selectedUser.CompanyName || "—"}</p>
+                  <label className="text-sm text-white/50">نام شرکت</label>
+                  <p className="text-white/80">
+                    {selectedUser.CompanyName || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">شماره ثبت</label>
-                  <p>{selectedUser.OfficialRegisterNumber || "—"}</p>
+                  <label className="text-sm text-white/50">شماره ثبت</label>
+                  <p className="text-white/80">
+                    {selectedUser.OfficialRegisterNumber || "—"}
+                  </p>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm text-gray-500">آدرس</label>
-                  <p>{selectedUser.Address || "—"}</p>
+                  <label className="text-sm text-white/50">آدرس</label>
+                  <p className="text-white/80">{selectedUser.Address || "—"}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">وبسایت</label>
-                  <p>{selectedUser.Website || "—"}</p>
+                  <label className="text-sm text-white/50">وبسایت</label>
+                  <p className="text-white/80">{selectedUser.Website || "—"}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">تلفن شرکت</label>
-                  <p>{selectedUser.CompanyPhoneNumber || "—"}</p>
+                  <label className="text-sm text-white/50">تلفن شرکت</label>
+                  <p className="text-white/80">
+                    {selectedUser.CompanyPhoneNumber || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">نام نماینده 1</label>
-                  <p>{selectedUser.AgentName1 || "—"}</p>
+                  <label className="text-sm text-white/50">نام نماینده 1</label>
+                  <p className="text-white/80">
+                    {selectedUser.AgentName1 || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">
+                  <label className="text-sm text-white/50">
                     تلفن نماینده 1
                   </label>
-                  <p>{selectedUser.AgentPhoneNumber1 || "—"}</p>
+                  <p className="text-white/80">
+                    {selectedUser.AgentPhoneNumber1 || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">نام نماینده 2</label>
-                  <p>{selectedUser.AgentName2 || "—"}</p>
+                  <label className="text-sm text-white/50">نام نماینده 2</label>
+                  <p className="text-white/80">
+                    {selectedUser.AgentName2 || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">
+                  <label className="text-sm text-white/50">
                     تلفن نماینده 2
                   </label>
-                  <p>{selectedUser.AgentPhoneNumber2 || "—"}</p>
+                  <p className="text-white/80">
+                    {selectedUser.AgentPhoneNumber2 || "—"}
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">وضعیت</label>
-                  <p>{selectedUser.Active ? "فعال" : "غیرفعال"}</p>
+                  <label className="text-sm text-white/50">وضعیت</label>
+                  <p className="text-white/80">
+                    {selectedUser.Active ? "فعال" : "غیرفعال"}
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 بستن
               </button>
@@ -747,23 +773,28 @@ export default function AdminLegalUsersPage() {
       {/* Edit Modal */}
       {modalType === "edit" && selectedUser && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">ویرایش کاربر حقوقی</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                ویرایش کاربر حقوقی
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     User ID
                   </label>
                   <input
@@ -775,11 +806,11 @@ export default function AdminLegalUsersPage() {
                         UserID: parseInt(e.target.value),
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام شرکت
                   </label>
                   <input
@@ -788,11 +819,11 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, CompanyName: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     شماره ثبت
                   </label>
                   <input
@@ -804,11 +835,11 @@ export default function AdminLegalUsersPage() {
                         OfficialRegisterNumber: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن شرکت
                   </label>
                   <input
@@ -820,22 +851,24 @@ export default function AdminLegalUsersPage() {
                         CompanyPhoneNumber: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">آدرس</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">
+                    آدرس
+                  </label>
                   <textarea
                     value={editForm.Address || ""}
                     onChange={(e) =>
                       setEditForm({ ...editForm, Address: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     rows={2}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     وبسایت
                   </label>
                   <input
@@ -844,11 +877,11 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, Website: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام نماینده 1
                   </label>
                   <input
@@ -857,11 +890,11 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, AgentName1: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن نماینده 1
                   </label>
                   <input
@@ -873,11 +906,11 @@ export default function AdminLegalUsersPage() {
                         AgentPhoneNumber1: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام نماینده 2
                   </label>
                   <input
@@ -886,11 +919,11 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setEditForm({ ...editForm, AgentName2: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن نماینده 2
                   </label>
                   <input
@@ -902,11 +935,11 @@ export default function AdminLegalUsersPage() {
                         AgentPhoneNumber2: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     وضعیت
                   </label>
                   <select
@@ -917,30 +950,51 @@ export default function AdminLegalUsersPage() {
                         Active: e.target.value === "true",
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    style={{
+                      width: "100%",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backdropFilter: "blur(8px)",
+                      color: "white",
+                      outline: "none",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                    }}
                   >
-                    <option value="true">فعال</option>
-                    <option value="false">غیرفعال</option>
+                    <option
+                      value="true"
+                      style={{ backgroundColor: "#4a4a4a", color: "white" }}
+                    >
+                      فعال
+                    </option>
+                    <option
+                      value="false"
+                      style={{ backgroundColor: "#4a4a4a", color: "white" }}
+                    >
+                      غیرفعال
+                    </option>
                   </select>
                 </div>
               </div>
-              <div className="bg-yellow-50 rounded-lg p-3 mt-2">
-                <p className="text-sm text-yellow-800">
+              <div className="bg-yellow-500/10 backdrop-blur-sm rounded-lg p-3 mt-2 border border-yellow-400/20">
+                <p className="text-sm text-yellow-200/80">
                   ⚠️ توجه: این اطلاعات فقط برای کاربرانی قابل ذخیره است که نوع
                   حساب آنها "حقوقی" باشد.
                 </p>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveEdit}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 ذخیره
               </button>
@@ -952,23 +1006,28 @@ export default function AdminLegalUsersPage() {
       {/* Create Modal */}
       {modalType === "create" && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="fixed bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">افزودن کاربر حقوقی جدید</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky  z-40 top-0 bg-black backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                افزودن کاربر حقوقی جدید
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     User ID *
                   </label>
                   <input
@@ -980,13 +1039,13 @@ export default function AdminLegalUsersPage() {
                         UserID: parseInt(e.target.value),
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="مثال: 101"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام شرکت *
                   </label>
                   <input
@@ -995,12 +1054,12 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setNewForm({ ...newForm, CompanyName: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="مثال: شرکت فناوری اطلاعات"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     شماره ثبت *
                   </label>
                   <input
@@ -1012,12 +1071,12 @@ export default function AdminLegalUsersPage() {
                         OfficialRegisterNumber: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="مثال: 14001234567"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن شرکت
                   </label>
                   <input
@@ -1029,24 +1088,26 @@ export default function AdminLegalUsersPage() {
                         CompanyPhoneNumber: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="مثال: 021-88765432"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">آدرس</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">
+                    آدرس
+                  </label>
                   <textarea
                     value={newForm.Address || ""}
                     onChange={(e) =>
                       setNewForm({ ...newForm, Address: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     rows={2}
                     placeholder="آدرس کامل شرکت"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     وبسایت
                   </label>
                   <input
@@ -1055,12 +1116,12 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setNewForm({ ...newForm, Website: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="مثال: www.example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام نماینده 1
                   </label>
                   <input
@@ -1069,12 +1130,12 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setNewForm({ ...newForm, AgentName1: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="نام نماینده اول"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن نماینده 1
                   </label>
                   <input
@@ -1086,12 +1147,12 @@ export default function AdminLegalUsersPage() {
                         AgentPhoneNumber1: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="تلفن نماینده اول"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     نام نماینده 2
                   </label>
                   <input
@@ -1100,12 +1161,12 @@ export default function AdminLegalUsersPage() {
                     onChange={(e) =>
                       setNewForm({ ...newForm, AgentName2: e.target.value })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="نام نماینده دوم"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     تلفن نماینده 2
                   </label>
                   <input
@@ -1117,25 +1178,25 @@ export default function AdminLegalUsersPage() {
                         AgentPhoneNumber2: e.target.value,
                       })
                     }
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                     placeholder="تلفن نماینده دوم"
                   />
                 </div>
               </div>
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-red-300/80">
                 فیلدهای ستاره دار (*) اجباری هستند
               </p>
             </div>
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveNewUser}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 افزودن کاربر
               </button>
@@ -1147,18 +1208,18 @@ export default function AdminLegalUsersPage() {
       {/* Delete Modal */}
       {modalType === "delete" && selectedUser && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center border border-red-400/30">
                   <svg
-                    className="w-8 h-8 text-red-600"
+                    className="w-8 h-8 text-red-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1172,20 +1233,22 @@ export default function AdminLegalUsersPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-center mb-2">حذف کاربر</h3>
-              <p className="text-gray-600 text-center mb-6">
+              <h3 className="text-lg font-bold text-white/90 text-center mb-2">
+                حذف کاربر
+              </h3>
+              <p className="text-white/60 text-center mb-6">
                 آیا از حذف کاربر "{selectedUser.CompanyName}" مطمئن هستید؟
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
                 >
                   انصراف
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-red-500/30 hover:bg-red-500/40 text-red-200 border border-red-400/30 rounded-lg transition"
                 >
                   حذف
                 </button>

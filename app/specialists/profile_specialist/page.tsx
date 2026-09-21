@@ -51,8 +51,6 @@ interface CategoryOption {
   name: string;
 }
 
-
-
 export default function SpecialistProfilePage() {
   const { getAccessToken, user: authUser, logout } = useAuth();
   const [specialist, setSpecialist] = useState<Specialist | null>(null);
@@ -84,7 +82,6 @@ export default function SpecialistProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [tempProfile, setTempProfile] = useState<ProfileData>(profile);
 
-  // دریافت لیست استان‌ها از API
   const fetchStates = async () => {
     const token = getAccessToken();
     if (!token) return;
@@ -105,7 +102,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  // دریافت لیست شهرهای یک استان
   const fetchCities = async (state: string) => {
     const token = getAccessToken();
     if (!token || !state) return;
@@ -129,7 +125,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  // دریافت لیست دسته‌بندی‌ها
   const fetchCategories = async () => {
     const token = getAccessToken();
     if (!token) return;
@@ -150,7 +145,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  // دریافت اطلاعات کاربر جاری از API users
   const fetchCurrentUser = async () => {
     const token = getAccessToken();
     if (!token) return null;
@@ -191,7 +185,6 @@ export default function SpecialistProfilePage() {
     return null;
   };
 
-  // دریافت اطلاعات متخصص مربوط به کاربر
   const fetchSpecialistForUser = async (userId: number) => {
     const token = getAccessToken();
     if (!token) return null;
@@ -222,7 +215,6 @@ export default function SpecialistProfilePage() {
     return null;
   };
 
-  // بارگذاری اصلی داده‌ها
   const loadData = async () => {
     const token = getAccessToken();
     if (!token) {
@@ -278,62 +270,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  // به‌روزرسانی اطلاعات کاربر
-  const updateUser = async () => {
-    const token = getAccessToken();
-
-    if (!token) {
-      alert("نشست کاربری منقضی شده است. لطفاً دوباره وارد شوید.");
-      return false;
-    }
-
-    if (!userInfo || !userInfo.ID) {
-      alert("اطلاعات کاربر یافت نشد. لطفاً صفحه را رفرش کنید.");
-      return false;
-    }
-
-    try {
-      const updateData: any = {};
-      if (tempProfile.firstName !== profile.firstName)
-        updateData.name = tempProfile.firstName;
-      if (tempProfile.lastName !== profile.lastName)
-        updateData.lastName = tempProfile.lastName;
-      if (tempProfile.phone !== profile.phone)
-        updateData.phoneNumber = tempProfile.phone;
-      if (tempProfile.email !== profile.email)
-        updateData.email = tempProfile.email;
-      if (tempProfile.city !== profile.city) updateData.city = tempProfile.city;
-      if (tempProfile.province !== profile.province)
-        updateData.state = tempProfile.province;
-      if (tempProfile.melliCode !== profile.melliCode)
-        updateData.melliCode = tempProfile.melliCode;
-
-      if (Object.keys(updateData).length === 0) {
-        return true;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/v1/users/${userInfo.ID}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        console.error("User update failed:", response.status);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error updating user:", error);
-      return false;
-    }
-  };
-
-  // به‌روزرسانی یا ایجاد متخصص
   const updateOrCreateSpecialist = async () => {
     const token = getAccessToken();
     if (!token || !userInfo) return false;
@@ -384,7 +320,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  // تغییر رمز عبور
   const changePassword = async () => {
     const token = getAccessToken();
     if (!token) return false;
@@ -454,7 +389,6 @@ export default function SpecialistProfilePage() {
     setSaving(true);
 
     try {
-      // فقط مهارت‌ها و دسته‌بندی‌ها را ذخیره کن (اطلاعات کاربر از لاگین می‌آید)
       const specialistSuccess = await updateOrCreateSpecialist();
 
       if (specialistSuccess) {
@@ -525,10 +459,10 @@ export default function SpecialistProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen ">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">در حال بارگذاری اطلاعات...</p>
+          <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">در حال بارگذاری اطلاعات...</p>
         </div>
       </div>
     );
@@ -536,14 +470,14 @@ export default function SpecialistProfilePage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center max-w-md">
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl p-6 text-center max-w-md">
           <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-xl font-bold text-red-800 mb-2">خطا</h2>
-          <p className="text-red-700 mb-4">{error}</p>
+          <h2 className="text-xl font-bold text-red-200 mb-2">خطا</h2>
+          <p className="text-red-200/80 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            className="px-4 py-2 bg-red-500/30 text-red-200 border border-red-400/30 rounded-lg hover:bg-red-500/40 transition"
           >
             تلاش مجدد
           </button>
@@ -553,15 +487,24 @@ export default function SpecialistProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 mt-30">
-      <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  p-4 md:p-6 relative overflow-hidden mt-30">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white/90">
               👤 پروفایل من
             </h1>
-            <p className="text-gray-600 text-sm mt-1">
+            <p className="text-white/50 text-sm mt-1">
               {userInfo?.name
                 ? `${userInfo.name} ${userInfo.lastName || ""} عزیز، خوش آمدید`
                 : "مشاهده و ویرایش اطلاعات شخصی"}
@@ -570,7 +513,7 @@ export default function SpecialistProfilePage() {
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-blue-500/20 text-white rounded-lg hover:bg-blue-500/30 transition border border-blue-400/20 flex items-center gap-2"
             >
               ✏️ ویرایش اطلاعات
             </button>
@@ -580,10 +523,10 @@ export default function SpecialistProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Profile Card */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 backdrop-blur-sm px-6 py-4 border-b border-white/10">
                 <h2 className="text-white font-bold text-lg">اطلاعات شخصی</h2>
-                <p className="text-indigo-100 text-sm">
+                <p className="text-indigo-200 text-sm">
                   اطلاعات حساب کاربری شما
                 </p>
               </div>
@@ -593,7 +536,7 @@ export default function SpecialistProfilePage() {
                   <div className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           نام
                         </label>
                         <input
@@ -601,11 +544,11 @@ export default function SpecialistProfilePage() {
                           name="firstName"
                           value={tempProfile.firstName}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           نام خانوادگی
                         </label>
                         <input
@@ -613,14 +556,14 @@ export default function SpecialistProfilePage() {
                           name="lastName"
                           value={tempProfile.lastName}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           شماره تلفن
                         </label>
                         <input
@@ -628,11 +571,11 @@ export default function SpecialistProfilePage() {
                           name="phone"
                           value={tempProfile.phone}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           ایمیل
                         </label>
                         <input
@@ -640,14 +583,14 @@ export default function SpecialistProfilePage() {
                           name="email"
                           value={tempProfile.email}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           کد ملی
                         </label>
                         <input
@@ -655,32 +598,58 @@ export default function SpecialistProfilePage() {
                           name="melliCode"
                           value={tempProfile.melliCode}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           استان
                         </label>
                         <select
                           name="province"
                           value={tempProfile.province}
                           onChange={handleProfileChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          style={{
+                            width: "100%",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            border: "1px solid rgba(255,255,255,0.2)",
+                            backgroundColor: "rgba(255,255,255,0.1)",
+                            backdropFilter: "blur(8px)",
+                            color: "white",
+                            outline: "none",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                          }}
                         >
-                          <option value="">انتخاب استان</option>
+                          <option
+                            value=""
+                            style={{
+                              backgroundColor: "#4a4a4a",
+                              color: "white",
+                            }}
+                          >
+                            انتخاب استان
+                          </option>
                           {states.map((state) => (
-                            <option key={state} value={state}>
+                            <option
+                              key={state}
+                              value={state}
+                              style={{
+                                backgroundColor: "#4a4a4a",
+                                color: "white",
+                              }}
+                            >
                               {state}
                             </option>
                           ))}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           شهر
                         </label>
                         <select
@@ -690,11 +659,37 @@ export default function SpecialistProfilePage() {
                           disabled={
                             !tempProfile.province || cities.length === 0
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+                          style={{
+                            width: "100%",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            border: "1px solid rgba(255,255,255,0.2)",
+                            backgroundColor: "rgba(255,255,255,0.1)",
+                            backdropFilter: "blur(8px)",
+                            color: "white",
+                            outline: "none",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                          }}
                         >
-                          <option value="">انتخاب شهر</option>
+                          <option
+                            value=""
+                            style={{
+                              backgroundColor: "#4a4a4a",
+                              color: "white",
+                            }}
+                          >
+                            انتخاب شهر
+                          </option>
                           {cities.map((city) => (
-                            <option key={city} value={city}>
+                            <option
+                              key={city}
+                              value={city}
+                              style={{
+                                backgroundColor: "#4a4a4a",
+                                color: "white",
+                              }}
+                            >
                               {city}
                             </option>
                           ))}
@@ -703,7 +698,7 @@ export default function SpecialistProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         مهارت‌ها
                       </label>
                       <textarea
@@ -711,16 +706,16 @@ export default function SpecialistProfilePage() {
                         value={tempProfile.skills}
                         onChange={handleProfileChange}
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                         placeholder="مهارت‌های خود را وارد کنید (با کاما جدا کنید)"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-white/40 mt-1">
                         مثال: juniper, voip, mpls, ccna
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-white/80 mb-2">
                         دسته‌بندی‌های تخصصی
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -729,10 +724,10 @@ export default function SpecialistProfilePage() {
                             key={cat.id}
                             type="button"
                             onClick={() => handleCategoryChange(cat.id)}
-                            className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                            className={`px-3 py-1 text-sm rounded-full transition ${
                               tempProfile.categoryIds.includes(cat.id)
-                                ? "bg-indigo-600 text-white"
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                ? "bg-blue-500/40 text-white border border-blue-400/30"
+                                : "bg-white/10 text-white/60 border border-white/10 hover:bg-white/20"
                             }`}
                           >
                             {cat.name}
@@ -745,14 +740,14 @@ export default function SpecialistProfilePage() {
                       <button
                         onClick={handleSaveProfile}
                         disabled={saving}
-                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {saving ? "⏳ در حال ذخیره..." : "💾 ذخیره تغییرات"}
                       </button>
                       <button
                         onClick={handleCancelEdit}
                         disabled={saving}
-                        className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50"
+                        className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg font-medium transition-colors disabled:opacity-50 border border-white/10"
                       >
                         انصراف
                       </button>
@@ -762,18 +757,18 @@ export default function SpecialistProfilePage() {
                   <div className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           نام
                         </label>
-                        <p className="mt-1 text-gray-900 font-medium">
+                        <p className="mt-1 text-white/90 font-medium">
                           {profile.firstName || "—"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           نام خانوادگی
                         </label>
-                        <p className="mt-1 text-gray-900 font-medium">
+                        <p className="mt-1 text-white/90 font-medium">
                           {profile.lastName || "—"}
                         </p>
                       </div>
@@ -781,18 +776,18 @@ export default function SpecialistProfilePage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           شماره تلفن
                         </label>
-                        <p className="mt-1 text-gray-900 font-mono">
+                        <p className="mt-1 text-white/90 font-mono">
                           {profile.phone || "—"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           ایمیل
                         </label>
-                        <p className="mt-1 text-gray-900">
+                        <p className="mt-1 text-white/90">
                           {profile.email || "—"}
                         </p>
                       </div>
@@ -800,10 +795,10 @@ export default function SpecialistProfilePage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           کد ملی
                         </label>
-                        <p className="mt-1 text-gray-900 font-mono">
+                        <p className="mt-1 text-white/90 font-mono">
                           {profile.melliCode || "—"}
                         </p>
                       </div>
@@ -811,25 +806,25 @@ export default function SpecialistProfilePage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           استان
                         </label>
-                        <p className="mt-1 text-gray-900">
+                        <p className="mt-1 text-white/90">
                           {profile.province || "—"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           شهر
                         </label>
-                        <p className="mt-1 text-gray-900">
+                        <p className="mt-1 text-white/90">
                           {profile.city || "—"}
                         </p>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-500">
+                      <label className="block text-sm font-medium text-white/50">
                         مهارت‌ها
                       </label>
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -838,7 +833,7 @@ export default function SpecialistProfilePage() {
                             skill.trim() && (
                               <span
                                 key={index}
-                                className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700"
+                                className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/20"
                               >
                                 {skill.trim()}
                               </span>
@@ -849,7 +844,7 @@ export default function SpecialistProfilePage() {
 
                     {profile.categoryIds.length > 0 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">
+                        <label className="block text-sm font-medium text-white/50">
                           دسته‌بندی‌ها
                         </label>
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -860,7 +855,7 @@ export default function SpecialistProfilePage() {
                             .map((cat) => (
                               <span
                                 key={cat.id}
-                                className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700"
+                                className="px-2 py-1 text-xs font-medium rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/20"
                               >
                                 {cat.name}
                               </span>
@@ -877,18 +872,18 @@ export default function SpecialistProfilePage() {
           {/* Sidebar Cards */}
           <div className="space-y-6">
             {/* Change Password Card */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-500/80 to-orange-500/80 backdrop-blur-sm px-6 py-4 border-b border-white/10">
                 <h2 className="text-white font-bold text-lg">
                   🔒 تغییر رمز عبور
                 </h2>
-                <p className="text-amber-100 text-sm">
+                <p className="text-amber-200 text-sm">
                   امنیت حساب خود را افزایش دهید
                 </p>
               </div>
               <div className="p-5 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     رمز عبور قدیمی
                   </label>
                   <input
@@ -896,12 +891,12 @@ export default function SpecialistProfilePage() {
                     name="oldPassword"
                     value={passwordData.oldPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
                     placeholder="رمز عبور فعلی را وارد کنید"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     رمز عبور جدید
                   </label>
                   <input
@@ -909,12 +904,12 @@ export default function SpecialistProfilePage() {
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
                     placeholder="رمز عبور جدید را وارد کنید"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white/80 mb-2">
                     تکرار رمز عبور جدید
                   </label>
                   <input
@@ -922,13 +917,13 @@ export default function SpecialistProfilePage() {
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
                     placeholder="رمز عبور جدید را مجدداً وارد کنید"
                   />
                 </div>
                 <button
                   onClick={handleChangePassword}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-medium transition-colors"
+                  className="w-full bg-amber-500/30 hover:bg-amber-500/40 text-white border border-amber-400/20 py-2 rounded-lg font-medium transition-colors"
                 >
                   تغییر رمز عبور
                 </button>
@@ -936,23 +931,23 @@ export default function SpecialistProfilePage() {
             </div>
 
             {/* Logout Card */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 overflow-hidden">
+              <div className="bg-gradient-to-r from-red-500/80 to-red-600/80 backdrop-blur-sm px-6 py-4 border-b border-white/10">
                 <h2 className="text-white font-bold text-lg">
                   🚪 خروج از حساب
                 </h2>
-                <p className="text-red-100 text-sm">
+                <p className="text-red-200 text-sm">
                   از حساب کاربری خود خارج شوید
                 </p>
               </div>
               <div className="p-5">
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-white/50 text-sm mb-4">
                   پس از خروج، برای دسترسی مجدد به حساب خود نیاز به وارد کردن
                   اطلاعات ورود خواهید داشت.
                 </p>
                 <button
                   onClick={handleLogout}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-red-500/30 hover:bg-red-500/40 text-white border border-red-400/20 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   🚪 خروج از حساب کاربری
                 </button>

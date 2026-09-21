@@ -4,7 +4,7 @@ const resolveApiBaseUrl = (): string => {
 
   if (!configuredUrl) {
     throw new Error(
-      "Missing backend API URL. Please set NEXT_PUBLIC_API_URL in your .env.local file.",
+      "NEXT_PUBLIC_API_URL=http://apialoipnetwork.hesamhelperdomain.ir",
     );
   }
 

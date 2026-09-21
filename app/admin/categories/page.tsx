@@ -191,7 +191,7 @@ export default function AdminCategoriesPage() {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s);
-      const success = await createCategoryRecord({
+    const success = await createCategoryRecord({
       name: newName,
       subCategory: subArray,
     });
@@ -212,29 +212,38 @@ export default function AdminCategoriesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6">
-        <div className="bg-white rounded-xl shadow-lg flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
+    <div className="min-h-screen p-4 md:p-6 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
           {/* Header */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl font-bold text-white/90">
                 📂 دسته‌بندی‌ها
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-white/50 text-sm mt-1">
                 مدیریت و مشاهده دسته‌بندی‌ها و زیرمجموعه‌ها
               </p>
             </div>
             <button
               onClick={handleCreate}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shrink-0"
+              className="bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shrink-0"
             >
               <svg
                 className="w-5 h-5"
@@ -254,10 +263,10 @@ export default function AdminCategoriesPage() {
           </div>
 
           {/* Search Filter */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+          <div className="p-4 sm:p-6 border-b border-white/10 bg-white/5 shrink-0">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   جستجو
                 </label>
                 <input
@@ -265,19 +274,19 @@ export default function AdminCategoriesPage() {
                   placeholder="جستجو بر اساس نام دسته‌بندی یا زیرمجموعه‌ها..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 text-white/70 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   حذف فیلترها
                 </button>
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-white/40">
               {filteredCategories.length} دسته‌بندی یافت شد
             </div>
           </div>
@@ -285,49 +294,49 @@ export default function AdminCategoriesPage() {
           {/* Scrollable Table */}
           <div className="flex-1 min-h-0 overflow-auto">
             <div className="hidden md:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-white/5 sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       نام
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       زیرمجموعه‌ها
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       عملیات
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/5">
                   {filteredCategories.map((category) => (
                     <tr
                       key={category.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-white/5 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                         {category.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white/90">
                         {category.name}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-white/60">
                         <div className="flex flex-wrap gap-1">
                           {category.subCategory &&
                           category.subCategory.length > 0 ? (
                             category.subCategory.map((sub, index) => (
                               <span
                                 key={index}
-                                className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
+                                className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-white border border-blue-400/20"
                               >
                                 {sub}
                               </span>
                             ))
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-white/30">—</span>
                           )}
                         </div>
                       </td>
@@ -335,19 +344,19 @@ export default function AdminCategoriesPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(category)}
-                            className="text-indigo-600 hover:text-indigo-900 px-3 py-1 rounded-md hover:bg-indigo-50"
+                            className="text-blue-300 hover:text-blue-200 px-3 py-1 rounded-md  transition"
                           >
                             مشاهده
                           </button>
                           <button
                             onClick={() => handleEdit(category)}
-                            className="text-amber-600 hover:text-amber-900 px-3 py-1 rounded-md hover:bg-amber-50"
+                            className="text-green-300 hover:text-green-200 px-3 py-1 rounded-md transition"
                           >
                             ویرایش
                           </button>
                           <button
                             onClick={() => handleDeleteClick(category)}
-                            className="text-red-600 hover:text-red-900 px-3 py-1 rounded-md hover:bg-red-50"
+                            className="text-red-300 hover:text-red-200 px-3 py-1 rounded-md transition"
                           >
                             حذف
                           </button>
@@ -364,19 +373,21 @@ export default function AdminCategoriesPage() {
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="p-4 border-b hover:bg-gray-50"
+                  className="p-4 border-b border-white/5 hover:bg-white/5"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <span className="text-xs text-gray-500">ID: </span>
-                      <span className="text-sm font-medium">{category.id}</span>
+                      <span className="text-xs text-white/40">ID: </span>
+                      <span className="text-sm font-medium text-white/80">
+                        {category.id}
+                      </span>
                     </div>
                   </div>
-                  <div className="font-bold text-base mb-2">
+                  <div className="font-bold text-base text-white/90 mb-2">
                     {category.name}
                   </div>
                   <div className="mb-3">
-                    <span className="text-xs text-gray-500 block mb-1">
+                    <span className="text-xs text-white/40 block mb-1">
                       زیرمجموعه‌ها
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -385,32 +396,32 @@ export default function AdminCategoriesPage() {
                         category.subCategory.map((sub, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
+                            className="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/20"
                           >
                             {sub}
                           </span>
                         ))
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-white/30">—</span>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     <button
                       onClick={() => handleView(category)}
-                      className="flex-1 text-indigo-600 py-2 text-sm"
+                      className="flex-1 text-blue-300 py-2 text-sm rounded transition"
                     >
                       مشاهده
                     </button>
                     <button
                       onClick={() => handleEdit(category)}
-                      className="flex-1 text-amber-600 py-2 text-sm"
+                      className="flex-1 text-amber-300 py-2 text-sm rounded transition"
                     >
                       ویرایش
                     </button>
                     <button
                       onClick={() => handleDeleteClick(category)}
-                      className="flex-1 text-red-600 py-2 text-sm"
+                      className="flex-1 text-red-300 py-2 text-sm rounded transition"
                     >
                       حذف
                     </button>
@@ -421,10 +432,10 @@ export default function AdminCategoriesPage() {
 
             {filteredCategories.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500">نتیجه‌ای یافت نشد</p>
+                <p className="text-white/50">نتیجه‌ای یافت نشد</p>
                 <button
                   onClick={handleResetFilters}
-                  className="mt-4 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg"
+                  className="mt-4 px-4 py-2 text-blue-300 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition"
                 >
                   حذف فیلترها
                 </button>
@@ -437,53 +448,58 @@ export default function AdminCategoriesPage() {
       {/* View Modal */}
       {modalType === "view" && selectedCategory && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">مشاهده دسته‌بندی</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                مشاهده دسته‌بندی
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-500">ID</label>
-                  <p>{selectedCategory.id}</p>
+                  <label className="text-sm text-white/50">ID</label>
+                  <p className="text-white/80">{selectedCategory.id}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">نام</label>
-                  <p>{selectedCategory.name}</p>
+                  <label className="text-sm text-white/50">نام</label>
+                  <p className="text-white/80">{selectedCategory.name}</p>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-sm text-gray-500">زیرمجموعه‌ها</label>
+                  <label className="text-sm text-white/50">زیرمجموعه‌ها</label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedCategory.subCategory &&
                     selectedCategory.subCategory.length > 0 ? (
                       selectedCategory.subCategory.map((sub, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
+                          className="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-white border border-blue-400/20"
                         >
                           {sub}
                         </span>
                       ))
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-white/30">—</span>
                     )}
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 بستن
               </button>
@@ -495,57 +511,62 @@ export default function AdminCategoriesPage() {
       {/* Edit Modal */}
       {modalType === "edit" && selectedCategory && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">ویرایش دسته‌بندی</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                ویرایش دسته‌بندی
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   نام دسته‌بندی
                 </label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   زیرمجموعه‌ها (با کاما جدا کنید)
                 </label>
                 <input
                   type="text"
                   value={editSubCategories}
                   onChange={(e) => setEditSubCategories(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   placeholder="مثال: cisco, huawei, juniper"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-white/40 mt-1">
                   زیرمجموعه‌ها را با کاما از هم جدا کنید
                 </p>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveEdit}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 ذخیره
               </button>
@@ -557,62 +578,67 @@ export default function AdminCategoriesPage() {
       {/* Create Modal */}
       {modalType === "create" && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">افزودن دسته‌بندی جدید</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
+                افزودن دسته‌بندی جدید
+              </h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   نام دسته‌بندی *
                 </label>
                 <input
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   placeholder="مثال: firewall"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   زیرمجموعه‌ها (با کاما جدا کنید)
                 </label>
                 <input
                   type="text"
                   value={newSubCategories}
                   onChange={(e) => setNewSubCategories(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                   placeholder="مثال: fortigate, sophos, pfsense"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-white/40 mt-1">
                   زیرمجموعه‌ها را با کاما از هم جدا کنید
                 </p>
-                <p className="text-xs text-red-500 mt-1">
+                <p className="text-xs text-red-500  mt-1">
                   فیلدهای ستاره دار (*) اجباری هستند
                 </p>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={saveNewCategory}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 افزودن
               </button>
@@ -624,18 +650,18 @@ export default function AdminCategoriesPage() {
       {/* Delete Modal */}
       {modalType === "delete" && selectedCategory && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center border border-red-400/30">
                   <svg
-                    className="w-8 h-8 text-red-600"
+                    className="w-8 h-8 text-red-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -649,26 +675,26 @@ export default function AdminCategoriesPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-center mb-2">
+              <h3 className="text-lg font-bold text-white/90 text-center mb-2">
                 حذف دسته‌بندی
               </h3>
-              <p className="text-gray-600 text-center mb-6">
+              <p className="text-white/60 text-center mb-6">
                 آیا از حذف دسته‌بندی "{selectedCategory.name}" مطمئن هستید؟
                 <br />
-                <span className="text-sm text-red-500">
+                <span className="text-sm text-red-300">
                   این عمل قابل بازگشت نیست.
                 </span>
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
                 >
                   انصراف
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-red-500/30 hover:bg-red-500/40 text-red-200 border border-red-400/30 rounded-lg transition"
                 >
                   حذف
                 </button>

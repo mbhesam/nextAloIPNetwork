@@ -54,6 +54,7 @@ export interface SpecialistSupportRequest {
   durationMinutes?: number;
   headTechRequired?: boolean;
   CreatedAt: string;
+  endRejectionReason?: string;
 }
 
 export const statusConfig: {
@@ -61,20 +62,20 @@ export const statusConfig: {
 } = {
   created: {
     label: "ایجاد شده",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-yellow-100 text-white",
     icon: "🟡",
   },
   inProgress: {
     label: "در حال انجام",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-blue-100 text-white",
     icon: "🔄",
   },
   resolved: {
     label: "حل شده",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-100 text-white",
     icon: "✅",
   },
-  cancelled: { label: "لغو شده", color: "bg-red-100 text-red-800", icon: "❌" },
+  cancelled: { label: "لغو شده", color: "bg-red-100 text-white", icon: "❌" },
 };
 
 export const planLabels: { [key: string]: string } = {
@@ -114,7 +115,10 @@ export const fetchSpecialistInfo = async (
 export const fetchSpecialistSupportRequests = async (
   token: string,
   specialist: SpecialistRecord | null,
-): Promise<{ requests: SpecialistSupportRequest[]; shiftMessage: string | null }> => {
+): Promise<{
+  requests: SpecialistSupportRequest[];
+  shiftMessage: string | null;
+}> => {
   if (!specialist) {
     return {
       requests: [],
@@ -234,17 +238,22 @@ export const acceptSpecialistSupportRequest = async (
 export const completeSpecialistSupportRequest = async (
   token: string,
   requestId: number,
+  durationMinutes: number,
 ) => {
-  const response = await fetch(`${API_BASE_URL}/v1/support-request/${requestId}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_BASE_URL}/v1/support-request/${requestId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        durationMinutes,
+        status: "waitingApproval",
+      }),
     },
-    body: JSON.stringify({
-      durationMinutes: 60,
-    }),
-  });
+  );
 
   return {
     ok: response.ok,

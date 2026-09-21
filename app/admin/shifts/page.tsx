@@ -22,8 +22,6 @@ interface Specialist {
   };
 }
 
-
-
 moment.loadPersian({ dialect: "persian-modern" });
 
 const timeLabels: { [key: string]: string } = {
@@ -34,10 +32,10 @@ const timeLabels: { [key: string]: string } = {
 };
 
 const timeColors: { [key: string]: string } = {
-  dawn: "bg-yellow-100 text-yellow-800",
-  morning: "bg-blue-100 text-blue-800",
-  evening: "bg-orange-100 text-orange-800",
-  night: "bg-purple-100 text-purple-800",
+  dawn: "bg-yellow-500/20 text-yellow-200",
+  morning: "bg-blue-500/20 text-blue-200",
+  evening: "bg-orange-500/20 text-orange-200",
+  night: "bg-purple-500/20 text-purple-200",
 };
 
 const timeIcons: { [key: string]: string } = {
@@ -191,7 +189,6 @@ export default function AdminShiftsPage() {
           specialists: shift.Specialists || [],
         }));
 
-        // مرتب‌سازی نزولی بر اساس تاریخ و ID (جدیدترین اول)
         const sortedShifts = [...convertedShifts].sort((a, b) => {
           if (a.shiftDate > b.shiftDate) return -1;
           if (a.shiftDate < b.shiftDate) return 1;
@@ -516,28 +513,37 @@ export default function AdminShiftsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen ">
+        <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col bg-gray-100">
-      <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6">
-        <div className="bg-white rounded-xl shadow-lg flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
+    <div className="min-h-screen  p-4 md:p-6 relative overflow-hidden">
+      {/* پس‌زمینه متحرک */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-2xl animate-pulse delay-700"></div>
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-2xl animate-pulse delay-300"></div>
+      </div>
+
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 p-4 sm:p-6">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg shadow-blue-500/5 flex flex-col flex-1 min-h-0 overflow-hidden mt-25">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              <h1 className="text-xl sm:text-2xl font-bold text-white/90">
                 📅 مدیریت شیفت‌ها
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-white/50 text-sm mt-1">
                 مدیریت و مشاهده شیفت‌های کاری متخصصان
               </p>
             </div>
             <button
               onClick={handleCreate}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -556,29 +562,30 @@ export default function AdminShiftsPage() {
             </button>
           </div>
 
-          <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0 overflow-x-auto">
+          {/* تقویم */}
+          <div className="p-4 border-b border-white/10 bg-white/5 flex-shrink-0 overflow-x-auto">
             <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
               <div className="flex gap-2">
                 <button
                   onClick={prevMonth}
-                  className="px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-3 py-1 bg-white/10 backdrop-blur-sm text-white/80 rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   ▶ قبلی
                 </button>
                 <button
                   onClick={goToToday}
-                  className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200"
+                  className="px-3 py-1 bg-blue-500/20 text-white rounded-lg  transition border border-blue-400/20"
                 >
                   امروز
                 </button>
                 <button
                   onClick={nextMonth}
-                  className="px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-3 py-1 bg-white/10 backdrop-blur-sm text-white/80 rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   ◀ بعدی
                 </button>
               </div>
-              <h2 className="text-lg font-bold">
+              <h2 className="text-lg font-bold text-white/90">
                 {monthNames[currentPersianMonth - 1]}{" "}
                 {toPersianDigits(currentPersianYear)}
               </h2>
@@ -588,7 +595,7 @@ export default function AdminShiftsPage() {
               {weekDays.map((day) => (
                 <div
                   key={day}
-                  className="text-center py-2 text-sm font-medium text-gray-600"
+                  className="text-center py-2 text-sm font-medium text-white/50"
                 >
                   {day}
                 </div>
@@ -616,10 +623,10 @@ export default function AdminShiftsPage() {
                 return (
                   <div
                     key={day}
-                    className={`border rounded-lg min-h-32 p-1 ${isToday ? "bg-indigo-50 border-indigo-300" : "bg-white"}`}
+                    className={`border rounded-lg min-h-32 p-1 ${isToday ? "bg-blue-500/20 border-blue-400/30" : "bg-white/5 border-white/10"}`}
                   >
                     <div
-                      className={`text-sm font-medium p-1 ${isToday ? "text-indigo-700" : "text-gray-700"}`}
+                      className={`text-sm font-medium p-1 ${isToday ? "text-blue-300" : "text-white/70"}`}
                     >
                       {toPersianDigits(day)}
                     </div>
@@ -627,7 +634,7 @@ export default function AdminShiftsPage() {
                       {dayShifts.map((shift) => (
                         <div
                           key={shift.id}
-                          className={`text-xs p-1 rounded flex justify-between items-center ${timeColors[shift.shiftTime]}`}
+                          className={`text-xs p-1 rounded flex justify-between items-center ${timeColors[shift.shiftTime]} backdrop-blur-sm`}
                         >
                           <span
                             className="truncate cursor-pointer flex-1"
@@ -644,7 +651,7 @@ export default function AdminShiftsPage() {
                               if (confirm("آیا از حذف این شیفت مطمئن هستید؟"))
                                 deleteShift(shift.id);
                             }}
-                            className="text-red-500 hover:text-red-700 text-xs shrink-0 ml-1 px-1"
+                            className="text-red-400 hover:text-red-300 text-xs shrink-0 ml-1 px-1 transition"
                           >
                             ✖
                           </button>
@@ -652,7 +659,7 @@ export default function AdminShiftsPage() {
                       ))}
                       <button
                         onClick={() => handleAddShiftFromCalendar(persianDate)}
-                        className="w-full text-xs text-gray-400 hover:text-indigo-600 py-1 mt-1"
+                        className="w-full text-xs text-white/30 hover:text-blue-300 py-1 mt-1 transition"
                       >
                         + افزودن شیفت
                       </button>
@@ -663,10 +670,11 @@ export default function AdminShiftsPage() {
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+          {/* جستجو */}
+          <div className="p-4 sm:p-6 border-b border-white/10 bg-white/5 flex-shrink-0">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   جستجو
                 </label>
                 <input
@@ -674,50 +682,53 @@ export default function AdminShiftsPage() {
                   placeholder="جستجو..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 text-white/70 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition border border-white/10"
                 >
                   حذف فیلترها
                 </button>
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-white/40">
               {filteredShifts.length} شیفت یافت شد
             </div>
           </div>
 
+          {/* جدول */}
           <div className="flex-1 min-h-0 overflow-auto">
             <div className="hidden md:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-white/5 sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       تاریخ
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       شیفت
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       متخصصان
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/50">
                       عملیات
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/5">
                   {filteredShifts.map((shift) => (
-                    <tr key={shift.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm">{shift.id}</td>
-                      <td className="px-6 py-4 text-sm">
+                    <tr key={shift.id} className="hover:bg-white/5 transition">
+                      <td className="px-6 py-4 text-sm text-white/80">
+                        {shift.id}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-white/60">
                         {convertGregorianToPersian(shift.shiftDate)}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -728,7 +739,7 @@ export default function AdminShiftsPage() {
                           {timeLabels[shift.shiftTime]}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-6 py-4 text-sm text-white/60">
                         {shift.specialists
                           ?.map((s) => getSpecialistName(s))
                           .join(", ") || "—"}
@@ -737,19 +748,19 @@ export default function AdminShiftsPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(shift)}
-                            className="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded"
+                            className="text-blue-300 hover:text-blue-200 px-2 py-1 rounded  transition"
                           >
                             مشاهده
                           </button>
                           <button
                             onClick={() => handleEdit(shift)}
-                            className="text-amber-600 hover:bg-amber-50 px-2 py-1 rounded"
+                            className="text-amber-300 hover:text-amber-200 px-2 py-1 rounded  transition"
                           >
                             ویرایش
                           </button>
                           <button
                             onClick={() => handleDeleteClick(shift)}
-                            className="text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                            className="text-red-300 hover:text-red-200 px-2 py-1 rounded  transition"
                           >
                             حذف
                           </button>
@@ -763,9 +774,12 @@ export default function AdminShiftsPage() {
 
             <div className="md:hidden">
               {filteredShifts.map((shift) => (
-                <div key={shift.id} className="p-4 border-b">
+                <div
+                  key={shift.id}
+                  className="p-4 border-b border-white/5 hover:bg-white/5"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-white/40">
                       ID: {shift.id}
                     </span>
                     <span
@@ -774,31 +788,31 @@ export default function AdminShiftsPage() {
                       {timeIcons[shift.shiftTime]} {timeLabels[shift.shiftTime]}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600 mb-1">
+                  <div className="text-sm text-white/60 mb-1">
                     تاریخ: {convertGregorianToPersian(shift.shiftDate)}
                   </div>
-                  <div className="text-sm text-gray-600 mb-3">
+                  <div className="text-sm text-white/60 mb-3">
                     متخصصان:{" "}
                     {shift.specialists
                       ?.map((s) => getSpecialistName(s))
                       .join(", ") || "—"}
                   </div>
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     <button
                       onClick={() => handleView(shift)}
-                      className="flex-1 text-indigo-600 py-1 text-sm"
+                      className="flex-1 text-blue-300 py-1 text-sm  rounded transition"
                     >
                       مشاهده
                     </button>
                     <button
                       onClick={() => handleEdit(shift)}
-                      className="flex-1 text-amber-600 py-1 text-sm"
+                      className="flex-1 text-amber-300 py-1 text-sm  rounded transition"
                     >
                       ویرایش
                     </button>
                     <button
                       onClick={() => handleDeleteClick(shift)}
-                      className="flex-1 text-red-600 py-1 text-sm"
+                      className="flex-1 text-red-300 py-1 text-sm rounded transition"
                     >
                       حذف
                     </button>
@@ -809,40 +823,45 @@ export default function AdminShiftsPage() {
 
             {filteredShifts.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500">نتیجه‌ای یافت نشد</p>
+                <p className="text-white/50">نتیجه‌ای یافت نشد</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* View Modal */}
       {modalType === "view" && selectedShift && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">مشاهده شیفت</h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+            <div className="border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">مشاهده شیفت</h2>
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-3">
               <div>
-                <label className="text-sm text-gray-500">ID</label>
-                <p>{selectedShift.id}</p>
+                <label className="text-sm text-white/50">ID</label>
+                <p className="text-white/80">{selectedShift.id}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">تاریخ</label>
-                <p>{convertGregorianToPersian(selectedShift.shiftDate)}</p>
+                <label className="text-sm text-white/50">تاریخ</label>
+                <p className="text-white/80">
+                  {convertGregorianToPersian(selectedShift.shiftDate)}
+                </p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">شیفت</label>
+                <label className="text-sm text-white/50">شیفت</label>
                 <p>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${timeColors[selectedShift.shiftTime]}`}
@@ -853,18 +872,18 @@ export default function AdminShiftsPage() {
                 </p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">متخصصان</label>
-                <p>
+                <label className="text-sm text-white/50">متخصصان</label>
+                <p className="text-white/80">
                   {selectedShift.specialists
                     ?.map((s) => getSpecialistName(s))
                     .join(", ") || "—"}
                 </p>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 بستن
               </button>
@@ -873,58 +892,82 @@ export default function AdminShiftsPage() {
         </div>
       )}
 
+      {/* Create/Edit Modal */}
       {(modalType === "create" || modalType === "edit") && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b px-6 py-4 flex justify-between">
-              <h2 className="text-xl font-bold">
+            <div className="border-b border-white/10 px-6 py-4 flex justify-between">
+              <h2 className="text-xl font-bold text-white/90">
                 {modalType === "create" ? "افزودن شیفت جدید" : "ویرایش شیفت"}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 text-2xl">
+              <button
+                onClick={closeModal}
+                className="text-white/40 text-2xl hover:text-white/80 transition"
+              >
                 &times;
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   تاریخ *
                 </label>
                 <input
                   type="text"
                   value={displayPersianDate}
                   disabled
-                  className="w-full p-2 border rounded-lg bg-gray-100 text-right"
+                  className="w-full p-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white cursor-not-allowed text-right"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">شیفت *</label>
+                <label className="block text-sm font-medium text-white/70 mb-1">
+                  شیفت *
+                </label>
                 <select
                   value={formData.shiftTime}
                   onChange={(e) =>
                     setFormData({ ...formData, shiftTime: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg"
+                  style={{
+                    width: "100%",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    backdropFilter: "blur(8px)",
+                    color: "white",
+                    outline: "none",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
                 >
                   {shiftTimes.map((st) => (
-                    <option key={st.id} value={st.name}>
+                    <option
+                      key={st.id}
+                      value={st.name}
+                      style={{ backgroundColor: "#4a4a4a", color: "white" }}
+                    >
                       {st.icon} {st.label} ({st.startTime} - {st.endTime})
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   متخصصان
                 </label>
-                <div className="border rounded-lg p-2 mb-2 max-h-32 overflow-y-auto">
+                <div className="border border-white/20 rounded-lg p-2 mb-2 max-h-32 overflow-y-auto bg-white/5 backdrop-blur-sm">
                   {specialists.map((spec) => (
-                    <div key={spec.ID} className="flex items-center gap-2 p-1">
+                    <div
+                      key={spec.ID}
+                      className="flex items-center gap-2 p-1 hover:bg-white/5 rounded"
+                    >
                       <input
                         type="checkbox"
                         id={`specialist-${spec.ID}`}
@@ -932,7 +975,7 @@ export default function AdminShiftsPage() {
                           spec.ID.toString(),
                         )}
                         onChange={(e) => {
-                          if (e.target.checked)
+                          if (e.target.checked) {
                             setFormData({
                               ...formData,
                               specialists: [
@@ -940,16 +983,21 @@ export default function AdminShiftsPage() {
                                 spec.ID.toString(),
                               ],
                             });
-                          else
+                          } else {
                             setFormData({
                               ...formData,
                               specialists: formData.specialists.filter(
                                 (s) => s !== spec.ID.toString(),
                               ),
                             });
+                          }
                         }}
+                        className="w-4 h-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-blue-400 focus:ring-offset-0"
                       />
-                      <label htmlFor={`specialist-${spec.ID}`}>
+                      <label
+                        htmlFor={`specialist-${spec.ID}`}
+                        className="text-white/80 text-sm"
+                      >
                         {spec.user?.name} {spec.user?.lastName} (ID: {spec.ID})
                       </label>
                     </div>
@@ -957,16 +1005,16 @@ export default function AdminShiftsPage() {
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
               >
                 انصراف
               </button>
               <button
                 onClick={modalType === "create" ? saveNewShift : saveEdit}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-blue-500/30 hover:bg-blue-500/40 text-white border border-blue-400/20 rounded-lg transition"
               >
                 {modalType === "create" ? "افزودن" : "ذخیره"}
               </button>
@@ -975,20 +1023,21 @@ export default function AdminShiftsPage() {
         </div>
       )}
 
+      {/* Delete Modal */}
       {modalType === "delete" && selectedShift && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full"
+            className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center border border-red-400/30">
                   <svg
-                    className="w-8 h-8 text-red-600"
+                    className="w-8 h-8 text-red-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1002,20 +1051,22 @@ export default function AdminShiftsPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-center mb-2">حذف شیفت</h3>
-              <p className="text-gray-600 text-center mb-6">
+              <h3 className="text-lg font-bold text-white/90 text-center mb-2">
+                حذف شیفت
+              </h3>
+              <p className="text-white/60 text-center mb-6">
                 آیا از حذف این شیفت مطمئن هستید؟
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 bg-gray-300 rounded-lg"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg transition"
                 >
                   انصراف
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-red-500/30 hover:bg-red-500/40 text-red-200 border border-red-400/30 rounded-lg transition"
                 >
                   حذف
                 </button>
